@@ -1,0 +1,244 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <title>Calculadora de Créditos Nattiva</title>
+
+  <link rel="manifest" href="./manifest.webmanifest" />
+  <meta name="theme-color" content="#b3202a" />
+  <link rel="icon" href="./icon-512.png" />
+  <link rel="apple-touch-icon" href="./icon-512.png" />
+
+  <link rel="stylesheet" href="./styles.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+</head>
+<body>
+
+  <div id="splash">
+    <img src="./assets/logo-nattiva.png" alt="Logo Nattiva">
+  </div>
+
+  <section id="loginScreen" class="screen">
+    <div class="login-shell">
+      <div class="login-card">
+        <img
+          src="./assets/logo-nattiva.png"
+          alt="Logo Nattiva"
+          class="login-logo"
+          onerror="this.style.display='none'"
+        />
+
+        <h2>Calculadora Nattiva</h2>
+        <p class="login-subtitle">Acceso al simulador comercial de créditos</p>
+
+        <div class="field full">
+          <label for="passwordInput">Contraseña</label>
+          <input
+            id="passwordInput"
+            type="password"
+            placeholder="Ingrese contraseña"
+            autocomplete="current-password"
+            enterkeyhint="done"
+          />
+        </div>
+
+        <button onclick="checkPassword()">Ingresar</button>
+        <p id="loginError" class="error-text"></p>
+      </div>
+    </div>
+  </section>
+
+  <main id="app" class="screen app-shell" style="display:none;">
+    <section class="calculator-layout" id="form">
+      <div class="showcase-panel">
+        <div class="showcase-top">
+          <img
+            src="./assets/logo-nattiva.png"
+            alt="Logo Nattiva"
+            class="brand-logo"
+            onerror="this.style.display='none'"
+          />
+          <span class="status-badge">Simulador premium</span>
+        </div>
+
+        <div class="showcase-copy">
+          <p class="eyebrow">Herramienta comercial</p>
+          <h1>Calculadora de Créditos Nattiva</h1>
+          <p class="lead">
+            Presenta una simulación clara, elegante y lista para compartir con el cliente.
+          </p>
+        </div>
+
+        <div class="showcase-cards">
+          <div class="mini-stat">
+            <span>Más claridad</span>
+            <strong>Resultado ejecutivo</strong>
+          </div>
+          <div class="mini-stat">
+            <span>Más velocidad</span>
+            <strong>Simulación inmediata</strong>
+          </div>
+          <div class="mini-stat">
+            <span>Más impacto</span>
+            <strong>Presentación comercial</strong>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-panel">
+        <div class="panel-head">
+          <p class="eyebrow">Ingreso de datos</p>
+          <h2>Completa la simulación</h2>
+        </div>
+
+        <div class="form-grid">
+          <div class="field full">
+            <label for="cliente">Nombre del cliente</label>
+            <input
+              id="cliente"
+              type="text"
+              inputmode="text"
+              autocomplete="name"
+              autocapitalize="words"
+              spellcheck="false"
+              placeholder="Ej: Juan Pérez"
+            />
+          </div>
+
+          <div class="field full">
+            <label for="precio">Precio del inmueble (S/)</label>
+            <input
+              id="precio"
+              type="text"
+              inputmode="numeric"
+              pattern="[0-9,]*"
+              placeholder="Ej: 500,000"
+            />
+          </div>
+
+          <div class="field">
+            <label for="cuota">Cuota inicial (%)</label>
+            <input
+              id="cuota"
+              type="text"
+              inputmode="decimal"
+              pattern="[0-9.,]*"
+              placeholder="Ej: 10"
+            />
+          </div>
+
+          <div class="field">
+            <label for="tea">TCEA (%)</label>
+            <input
+              id="tea"
+              type="text"
+              inputmode="decimal"
+              pattern="[0-9.,]*"
+              placeholder="Ej: 8"
+            />
+          </div>
+
+          <div class="field full">
+            <label for="plazo">Plazo (años)</label>
+            <input
+              id="plazo"
+              type="text"
+              inputmode="numeric"
+              pattern="[0-9]*"
+              placeholder="Ej: 20"
+            />
+          </div>
+        </div>
+
+        <button class="primary-btn" onclick="calcular()">Calcular simulación</button>
+        <p id="err" class="error-text"></p>
+      </div>
+    </section>
+
+    <section class="result-layout hide" id="result">
+      <div id="pdfContent" class="result-document">
+        <div class="result-cover">
+          <div class="result-cover-brand">
+            <img
+              src="./assets/logo-nattiva.png"
+              alt="Logo Nattiva"
+              class="result-main-logo"
+              onerror="this.style.display='none'"
+            />
+            <div>
+              <p class="eyebrow light">Resumen financiero</p>
+              <h1 class="light-title">Propuesta de crédito</h1>
+              <p class="light-subtitle">Simulación comercial generada para evaluación preliminar.</p>
+            </div>
+          </div>
+
+          <div class="hero-metric">
+            <span>Cuota mensual estimada</span>
+            <h2 id="cuotaMensual"></h2>
+          </div>
+        </div>
+
+        <div class="client-banner">
+          <div>
+            <span>Cliente</span>
+            <strong id="outCliente"></strong>
+          </div>
+          <div class="client-tag">Simulación referencial</div>
+        </div>
+
+        <div class="insight-strip">
+          <div class="insight-card">
+            <span>Ingreso mensual referencial</span>
+            <strong id="outIngreso"></strong>
+          </div>
+          <div class="insight-card">
+            <span>Monto a financiar</span>
+            <strong id="outMonto"></strong>
+          </div>
+        </div>
+
+        <div class="detail-board">
+          <div class="board-head">
+            <h3>Detalle de la operación</h3>
+            <p>Variables principales consideradas en la simulación</p>
+          </div>
+
+          <div class="detail-list">
+            <div class="detail-row">
+              <span>Precio del inmueble</span>
+              <strong id="outPrecio"></strong>
+            </div>
+            <div class="detail-row">
+              <span>Cuota inicial (<span id="outCuotaPct"></span>%)</span>
+              <strong id="outCuota"></strong>
+            </div>
+            <div class="detail-row">
+              <span>Plazo</span>
+              <strong id="outPlazo"></strong>
+            </div>
+            <div class="detail-row">
+              <span>TCEA</span>
+              <strong id="outTea"></strong>
+            </div>
+          </div>
+        </div>
+
+        <div class="foot-note">
+          Esta simulación es informativa y está sujeta a evaluación crediticia, políticas internas y condiciones comerciales vigentes.
+        </div>
+      </div>
+
+      <div class="actions premium-actions">
+        <button class="primary-btn" onclick="descargarPDF()">Descargar PDF</button>
+        <button class="ghost-btn" onclick="compartirWhatsApp()">WhatsApp</button>
+        <button class="ghost-btn" onclick="compartirEmail()">Email</button>
+        <button class="ghost-btn" onclick="compartirGeneral()">Compartir</button>
+        <button class="secondary-btn" onclick="resetear()">Nueva consulta</button>
+      </div>
+    </section>
+  </main>
+
+  <script src="./script.js"></script>
+</body>
+</html>
