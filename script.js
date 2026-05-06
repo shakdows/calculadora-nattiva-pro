@@ -40,7 +40,7 @@ function initSlideshow() {
   }, 4500);
 }
 
-/* ── Input helpers ── */
+/* ── Inputs ── */
 function cleanNum(v) { return v.replace(/[^\d.,]/g, ""); }
 function num(v) { return parseFloat((v || "").replace(/,/g, "")) || 0; }
 
@@ -107,7 +107,7 @@ function resetear() {
   window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
-/* ── Texto resumen ── */
+/* ── Compartir ── */
 function generarTexto() {
   return (
     "📊 *Propuesta de crédito Nattiva*\n\n" +
@@ -126,50 +126,128 @@ function generarTexto() {
 function compartirWhatsApp() {
   window.open("https://api.whatsapp.com/send?text=" + encodeURIComponent(generarTexto()), "_blank");
 }
-
 function compartirEmail() {
   window.location.href =
     "mailto:?subject=" + encodeURIComponent("Propuesta de crédito Nattiva — " + outCliente.textContent) +
     "&body=" + encodeURIComponent(generarTexto());
 }
-
 async function compartirGeneral() {
   const texto = generarTexto();
   if (navigator.share) {
     try { await navigator.share({ title: "Propuesta Nattiva", text: texto }); } catch {}
   } else {
-    try {
-      await navigator.clipboard.writeText(texto);
-      alert("✅ Resumen copiado al portapapeles.");
-    } catch {
-      alert("Usa WhatsApp o Email para compartir.");
-    }
+    try { await navigator.clipboard.writeText(texto); alert("✅ Resumen copiado al portapapeles."); }
+    catch { alert("Usa WhatsApp o Email para compartir."); }
   }
 }
 
 /* ── PDF ── */
 function descargarPDF() {
-  const el = document.getElementById("pdfContent");
-  if (!el) { alert("No se encontró el contenido."); return; }
   if (typeof html2pdf === "undefined") { alert("Librería PDF no cargada."); return; }
 
   const name = outCliente.textContent
     ? outCliente.textContent.replace(/[^\w\s-]/g, "").replace(/\s+/g, "-")
     : "Cliente";
 
+  // Crear contenido HTML autónomo para el PDF con estilos inline
+  const logoSrc = document.querySelector(".result-main-logo").src;
+
+  const html = `
+    <div style="font-family:'Inter',Arial,sans-serif; color:#0d1f3c; width:100%; max-width:700px; margin:0 auto;">
+
+      <!-- COVER -->
+      <div style="background:#0d1f3c; padding:28px 30px; display:flex; align-items:center; justify-content:space-between; gap:16px; margin-bottom:0;">
+        <div style="display:flex; align-items:center; gap:14px; flex:1;">
+          <img src="${logoSrc}" style="width:90px; height:auto; border-radius:8px;" />
+          <div>
+            <div style="font-size:10px; font-weight:700; letter-spacing:.2em; text-transform:uppercase; color:rgba(255,255,255,.55); margin-bottom:5px;">RESUMEN FINANCIERO</div>
+            <div style="font-family:Georgia,serif; font-size:26px; font-weight:800; color:#fff; line-height:1.1;">Propuesta de crédito</div>
+            <div style="font-size:11px; color:rgba(255,255,255,.5); margin-top:5px;">Simulación generada para evaluación preliminar</div>
+          </div>
+        </div>
+        <div style="background:rgba(255,255,255,.12); border:1px solid rgba(255,255,255,.2); border-radius:14px; padding:16px 20px; text-align:center; min-width:170px;">
+          <div style="font-size:10px; font-weight:700; letter-spacing:.16em; text-transform:uppercase; color:rgba(255,255,255,.6); margin-bottom:6px;">CUOTA MENSUAL ESTIMADA</div>
+          <div style="font-size:30px; font-weight:800; color:#fff; letter-spacing:-.01em;">${cuotaMensual.textContent}</div>
+        </div>
+      </div>
+
+      <!-- CLIENT -->
+      <div style="background:#faf7f2; padding:14px 28px; display:flex; align-items:center; justify-content:space-between; border-bottom:1px solid #e2eaf4;">
+        <div>
+          <div style="font-size:10px; font-weight:700; letter-spacing:.18em; text-transform:uppercase; color:#6b7a95; margin-bottom:4px;">CLIENTE</div>
+          <div style="font-family:Georgia,serif; font-size:22px; font-weight:700; color:#0d1f3c;">${outCliente.textContent}</div>
+        </div>
+        <div style="padding:6px 13px; border-radius:999px; background:#fde8ea; border:1px solid rgba(179,32,42,.2); color:#b3202a; font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.09em;">Simulación referencial</div>
+      </div>
+
+      <!-- INSIGHTS -->
+      <div style="display:flex; border-bottom:1px solid #e2eaf4;">
+        <div style="flex:1; padding:18px 24px; background:#fdf6e3; border-right:1px solid rgba(232,184,75,.3);">
+          <div style="font-size:11px; color:#6b7a95; margin-bottom:7px; font-weight:500;">Ingreso mensual referencial</div>
+          <div style="font-size:24px; font-weight:800; color:#0d1f3c; letter-spacing:-.02em;">${outIngreso.textContent}</div>
+        </div>
+        <div style="flex:1; padding:18px 24px; background:#f8fafd;">
+          <div style="font-size:11px; color:#6b7a95; margin-bottom:7px; font-weight:500;">Monto a financiar</div>
+          <div style="font-size:24px; font-weight:800; color:#0d1f3c; letter-spacing:-.02em;">${outMonto.textContent}</div>
+        </div>
+      </div>
+
+      <!-- DETAIL -->
+      <div style="padding:18px 28px 14px; background:#fff;">
+        <div style="margin-bottom:12px; display:flex; align-items:baseline; gap:10px;">
+          <span style="font-family:Georgia,serif; font-size:16px; font-weight:700; color:#0d1f3c;">Detalle de la operación</span>
+          <span style="font-size:11px; color:#6b7a95;">Variables consideradas en la simulación</span>
+        </div>
+        <table style="width:100%; border-collapse:collapse; border:1px solid #e2eaf4; border-radius:12px; overflow:hidden;">
+          <tr style="background:#fff;">
+            <td style="padding:13px 18px; font-size:13px; color:#6b7a95; border-bottom:1px solid #e2eaf4;">Precio del inmueble</td>
+            <td style="padding:13px 18px; font-size:18px; font-weight:800; color:#0d1f3c; text-align:right; border-bottom:1px solid #e2eaf4; letter-spacing:-.01em;">${outPrecio.textContent}</td>
+          </tr>
+          <tr style="background:#f8fafd;">
+            <td style="padding:13px 18px; font-size:13px; color:#6b7a95; border-bottom:1px solid #e2eaf4;">Cuota inicial (${outCuotaPct.textContent}%)</td>
+            <td style="padding:13px 18px; font-size:18px; font-weight:800; color:#0d1f3c; text-align:right; border-bottom:1px solid #e2eaf4; letter-spacing:-.01em;">${outCuota.textContent}</td>
+          </tr>
+          <tr style="background:#fff;">
+            <td style="padding:13px 18px; font-size:13px; color:#6b7a95; border-bottom:1px solid #e2eaf4;">Plazo</td>
+            <td style="padding:13px 18px; font-size:18px; font-weight:800; color:#0d1f3c; text-align:right; border-bottom:1px solid #e2eaf4; letter-spacing:-.01em;">${outPlazo.textContent}</td>
+          </tr>
+          <tr style="background:#f8fafd;">
+            <td style="padding:13px 18px; font-size:13px; color:#6b7a95;">TCEA</td>
+            <td style="padding:13px 18px; font-size:18px; font-weight:800; color:#0d1f3c; text-align:right; letter-spacing:-.01em;">${outTea.textContent}</td>
+          </tr>
+        </table>
+      </div>
+
+      <!-- FOOTER -->
+      <div style="padding:12px 28px; background:#f4f7fb; border-top:1px solid #e2eaf4; color:#6b7a95; font-size:11px; text-align:center; line-height:1.5;">
+        Esta simulación es informativa y está sujeta a evaluación crediticia, políticas internas y condiciones comerciales vigentes.
+      </div>
+
+    </div>
+  `;
+
+  const wrapper = document.createElement("div");
+  wrapper.innerHTML = html;
+  document.body.appendChild(wrapper);
+  wrapper.style.position = "absolute";
+  wrapper.style.left = "-9999px";
+
   html2pdf().set({
-    margin: [0.3, 0.3, 0.3, 0.3],
+    margin: 0.4,
     filename: "Nattiva-Credito-" + name + ".pdf",
     image: { type: "jpeg", quality: 1 },
     html2canvas: {
       scale: 3,
       useCORS: true,
       backgroundColor: "#ffffff",
-      logging: false
+      logging: false,
+      allowTaint: true
     },
     jsPDF: { unit: "in", format: "a4", orientation: "portrait" },
     pagebreak: { mode: ["avoid-all"] }
-  }).from(el).save();
+  }).from(wrapper.firstElementChild).save().then(() => {
+    document.body.removeChild(wrapper);
+  });
 }
 
 /* ── Init ── */
