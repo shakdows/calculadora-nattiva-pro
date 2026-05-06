@@ -19,10 +19,8 @@
   </div>
 
   <!-- LOGIN -->
-  <section id="loginScreen" class="screen" style="padding:0;">
+  <section id="loginScreen" class="screen" style="padding:0; min-height:100vh;">
     <div class="login-shell">
-
-      <!-- Slideshow BG -->
       <div class="login-bg">
         <div class="login-bg-slide active"></div>
         <div class="login-bg-slide"></div>
@@ -30,8 +28,6 @@
         <div class="login-bg-slide"></div>
         <div class="login-bg-overlay"></div>
       </div>
-
-      <!-- Card -->
       <div class="login-card">
         <img src="./assets/logo-nattiva.png" alt="Nattiva" class="login-logo" onerror="this.style.display='none'" />
         <h2>Calculadora Nattiva</h2>
@@ -63,7 +59,6 @@
             <p>Simulador comercial Nattiva</p>
           </div>
         </div>
-
         <div class="form-grid">
           <div class="field full">
             <label for="cliente">Nombre del cliente</label>
@@ -87,7 +82,6 @@
             <input id="plazo" type="text" inputmode="numeric" placeholder="Ej: 20" />
           </div>
         </div>
-
         <button class="calc-btn" onclick="calcular()">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="10" x2="16" y2="10"/><line x1="8" y1="14" x2="16" y2="14"/><line x1="8" y1="18" x2="12" y2="18"/></svg>
           Calcular simulación
@@ -103,8 +97,9 @@
         <!-- Cover -->
         <div class="result-cover">
           <div class="result-cover-left">
-            <img src="./assets/logo-nattiva.png" alt="Nattiva" class="result-main-logo" onerror="this.style.display='none'" />
-            <div class="cover-text">
+            <img src="./assets/logo-nattiva.png" alt="Nattiva" class="result-main-logo"
+              onerror="this.style.display='none'" />
+            <div>
               <div class="cover-eyebrow">Resumen financiero</div>
               <div class="cover-title">Propuesta de crédito</div>
               <div class="cover-sub">Simulación generada para evaluación preliminar</div>
@@ -166,11 +161,11 @@
         <div class="foot-note">
           Esta simulación es informativa y está sujeta a evaluación crediticia, políticas internas y condiciones comerciales vigentes.
         </div>
+
       </div>
 
-      <!-- Buttons -->
+      <!-- Botones -->
       <div class="premium-actions">
-
         <button class="action-btn btn-pdf" onclick="descargarPDF()">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
           Descargar PDF
@@ -195,7 +190,6 @@
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-4.95"/></svg>
           Nueva consulta
         </button>
-
       </div>
     </section>
 

@@ -3,7 +3,6 @@ const correctPassword = "2026Nattiva";
 const nf  = new Intl.NumberFormat("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 const nfi = new Intl.NumberFormat("en-US");
 
-/* ── DOM refs ── */
 const loginScreen   = document.getElementById("loginScreen");
 const app           = document.getElementById("app");
 const passwordInput = document.getElementById("passwordInput");
@@ -38,19 +37,18 @@ function initSlideshow() {
     slides[current].classList.remove("active");
     current = (current + 1) % slides.length;
     slides[current].classList.add("active");
-  }, 4000);
+  }, 4500);
 }
 
 /* ── Input helpers ── */
 function cleanNum(v) { return v.replace(/[^\d.,]/g, ""); }
-function num(v)      { return parseFloat((v || "").replace(/,/g, "")) || 0; }
+function num(v) { return parseFloat((v || "").replace(/,/g, "")) || 0; }
 
-precio.addEventListener("input", () => { precio.value = nfi.format(num(cleanNum(precio.value))); });
-cuota.addEventListener("input",  () => { cuota.value = cleanNum(cuota.value); });
-tea.addEventListener("input",    () => { tea.value   = cleanNum(tea.value); });
-plazo.addEventListener("input",  () => { plazo.value = plazo.value.replace(/[^\d]/g, ""); });
-cliente.addEventListener("input",() => { cliente.value = cliente.value.replace(/[0-9]/g, ""); });
-
+precio.addEventListener("input",  () => { precio.value  = nfi.format(num(cleanNum(precio.value))); });
+cuota.addEventListener("input",   () => { cuota.value   = cleanNum(cuota.value); });
+tea.addEventListener("input",     () => { tea.value     = cleanNum(tea.value); });
+plazo.addEventListener("input",   () => { plazo.value   = plazo.value.replace(/[^\d]/g, ""); });
+cliente.addEventListener("input", () => { cliente.value = cliente.value.replace(/[0-9]/g, ""); });
 passwordInput.addEventListener("keydown", e => { if (e.key === "Enter") checkPassword(); });
 
 /* ── Auth ── */
@@ -78,12 +76,12 @@ function calcular() {
   if (t <= 0) { err.textContent = "La TCEA debe ser mayor a 0."; return; }
   if (a <= 0) { err.textContent = "El plazo debe ser mayor a 0 años."; return; }
 
-  const ci   = p * (c / 100);
-  const mf   = p - ci;
-  const r    = Math.pow(1 + t / 100, 1 / 12) - 1;
-  const m    = a * 12;
-  const cm   = mf * (r / (1 - Math.pow(1 + r, -m)));
-  const ing  = cm / 0.3;
+  const ci  = p * (c / 100);
+  const mf  = p - ci;
+  const r   = Math.pow(1 + t / 100, 1 / 12) - 1;
+  const m   = a * 12;
+  const cm  = mf * (r / (1 - Math.pow(1 + r, -m)));
+  const ing = cm / 0.3;
 
   outCliente.textContent   = nombre;
   cuotaMensual.textContent = "S/ " + nf.format(cm);
@@ -109,7 +107,7 @@ function resetear() {
   window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
-/* ── Compartir ── */
+/* ── Texto resumen ── */
 function generarTexto() {
   return (
     "📊 *Propuesta de crédito Nattiva*\n\n" +
@@ -144,7 +142,7 @@ async function compartirGeneral() {
       await navigator.clipboard.writeText(texto);
       alert("✅ Resumen copiado al portapapeles.");
     } catch {
-      alert("Usa los botones de WhatsApp o Email para compartir.");
+      alert("Usa WhatsApp o Email para compartir.");
     }
   }
 }
@@ -160,12 +158,17 @@ function descargarPDF() {
     : "Cliente";
 
   html2pdf().set({
-    margin: 0.35,
+    margin: [0.3, 0.3, 0.3, 0.3],
     filename: "Nattiva-Credito-" + name + ".pdf",
-    image: { type: "jpeg", quality: 0.98 },
-    html2canvas: { scale: 2, useCORS: true, backgroundColor: "#ffffff" },
+    image: { type: "jpeg", quality: 1 },
+    html2canvas: {
+      scale: 3,
+      useCORS: true,
+      backgroundColor: "#ffffff",
+      logging: false
+    },
     jsPDF: { unit: "in", format: "a4", orientation: "portrait" },
-    pagebreak: { mode: ["avoid-all", "css", "legacy"] }
+    pagebreak: { mode: ["avoid-all"] }
   }).from(el).save();
 }
 
