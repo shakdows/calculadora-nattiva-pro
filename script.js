@@ -155,23 +155,23 @@ function descargarPDF() {
 
   /* ── HTML 100% con TABLE layout — sin flex/grid — html2pdf lo renderiza perfectamente ── */
   const html = `
-<div style="font-family:Arial,sans-serif;color:#0d1f3c;width:680px;margin:0 auto;border:1px solid #e2eaf4;border-radius:12px;overflow:hidden;">
+<div style="font-family:Arial,sans-serif;color:#0d1f3c;width:520px;margin:0 auto;border:1px solid #e2eaf4;border-radius:12px;overflow:hidden;">
 
   <!-- ═══ HEADER ═══ -->
   <table width="100%" cellpadding="0" cellspacing="0" style="-webkit-print-color-adjust:exact;print-color-adjust:exact;background:#0d1f3c;background-image:linear-gradient(135deg,#0d1f3c 0%,#1a2f55 50%,#6e0e14 100%);">
     <tr>
-      <td style="padding:28px 28px 28px 24px;vertical-align:middle;">
-        ${logoSrc ? `<img src="${logoSrc}" style="width:80px;height:auto;border-radius:8px;display:block;" />` : ''}
+      <td style="padding:18px 18px 18px 16px;vertical-align:middle;">
+        ${logoSrc ? `<img src="${logoSrc}" style="width:60px;height:auto;border-radius:6px;display:block;" />` : ''}
       </td>
-      <td style="padding:28px 10px;vertical-align:middle;">
+      <td style="padding:18px 8px;vertical-align:middle;">
         <div style="font-size:9px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:rgba(255,255,255,.55);margin-bottom:5px;">RESUMEN FINANCIERO</div>
-        <div style="font-family:Georgia,serif;font-size:24px;font-weight:800;color:#fff;line-height:1.1;">Propuesta de crédito</div>
+        <div style="font-family:Georgia,serif;font-size:18px;font-weight:800;color:#fff;line-height:1.1;">Propuesta de crédito</div>
         <div style="font-size:11px;color:rgba(255,255,255,.5);margin-top:5px;">Simulación generada para evaluación preliminar</div>
       </td>
-      <td style="padding:20px 24px 20px 10px;vertical-align:middle;text-align:right;white-space:nowrap;">
+      <td style="padding:14px 16px 14px 8px;vertical-align:middle;text-align:right;white-space:nowrap;">
         <div style="-webkit-print-color-adjust:exact;print-color-adjust:exact;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.25);border-radius:14px;padding:14px 18px;display:inline-block;text-align:center;min-width:160px;">
           <div style="font-size:9px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,.65);margin-bottom:7px;">CUOTA MENSUAL ESTIMADA</div>
-          <div style="font-size:28px;font-weight:800;color:#fff;letter-spacing:-.01em;">${cuotaMensual.textContent}</div>
+          <div style="font-size:22px;font-weight:800;color:#fff;letter-spacing:-.01em;">${cuotaMensual.textContent}</div>
         </div>
       </td>
     </tr>
@@ -180,11 +180,11 @@ function descargarPDF() {
   <!-- ═══ CLIENTE ═══ -->
   <table width="100%" cellpadding="0" cellspacing="0" style="-webkit-print-color-adjust:exact;print-color-adjust:exact;background:#faf7f2;border-bottom:1px solid #e2eaf4;">
     <tr>
-      <td style="padding:16px 28px;vertical-align:middle;">
+      <td style="padding:12px 18px;vertical-align:middle;">
         <div style="font-size:9px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:#6b7a95;margin-bottom:5px;">CLIENTE</div>
-        <div style="font-family:Georgia,serif;font-size:22px;font-weight:700;color:#0d1f3c;">${outCliente.textContent}</div>
+        <div style="font-family:Georgia,serif;font-size:17px;font-weight:700;color:#0d1f3c;">${outCliente.textContent}</div>
       </td>
-      <td style="padding:16px 28px;vertical-align:middle;text-align:right;">
+      <td style="padding:12px 18px;vertical-align:middle;text-align:right;">
         <span style="-webkit-print-color-adjust:exact;print-color-adjust:exact;display:inline-block;padding:6px 14px;border-radius:999px;background:#fde8ea;border:1px solid rgba(179,32,42,.2);color:#b3202a;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.09em;">Simulación referencial</span>
       </td>
     </tr>
@@ -193,13 +193,13 @@ function descargarPDF() {
   <!-- ═══ MÉTRICAS ═══ -->
   <table width="100%" cellpadding="0" cellspacing="0" style="border-bottom:1px solid #e2eaf4;">
     <tr>
-      <td width="50%" style="-webkit-print-color-adjust:exact;print-color-adjust:exact;background:#fdf6e3;padding:20px 28px;border-right:1px solid rgba(232,184,75,.3);vertical-align:top;">
+      <td width="50%" style="-webkit-print-color-adjust:exact;print-color-adjust:exact;background:#fdf6e3;padding:14px 18px;border-right:1px solid rgba(232,184,75,.3);vertical-align:top;">
         <div style="font-size:11px;color:#6b7a95;margin-bottom:8px;font-weight:500;">Ingreso mensual referencial</div>
-        <div style="font-size:26px;font-weight:800;color:#0d1f3c;letter-spacing:-.02em;">${outIngreso.textContent}</div>
+        <div style="font-size:20px;font-weight:800;color:#0d1f3c;letter-spacing:-.02em;">${outIngreso.textContent}</div>
       </td>
-      <td width="50%" style="-webkit-print-color-adjust:exact;print-color-adjust:exact;background:#f8fafd;padding:20px 28px;vertical-align:top;">
+      <td width="50%" style="-webkit-print-color-adjust:exact;print-color-adjust:exact;background:#f8fafd;padding:14px 18px;vertical-align:top;">
         <div style="font-size:11px;color:#6b7a95;margin-bottom:8px;font-weight:500;">Monto a financiar</div>
-        <div style="font-size:26px;font-weight:800;color:#0d1f3c;letter-spacing:-.02em;">${outMonto.textContent}</div>
+        <div style="font-size:20px;font-weight:800;color:#0d1f3c;letter-spacing:-.02em;">${outMonto.textContent}</div>
       </td>
     </tr>
   </table>
@@ -216,37 +216,37 @@ function descargarPDF() {
 
   <table width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 0 0;border-top:1px solid #e2eaf4;">
     <tr style="-webkit-print-color-adjust:exact;print-color-adjust:exact;background:#fff;">
-      <td style="padding:14px 28px;font-size:13px;color:#6b7a95;border-bottom:1px solid #e2eaf4;">Precio del inmueble</td>
-      <td style="padding:14px 28px;font-size:20px;font-weight:800;color:#0d1f3c;text-align:right;border-bottom:1px solid #e2eaf4;">${outPrecio.textContent}</td>
+      <td style="padding:10px 18px;font-size:13px;color:#6b7a95;border-bottom:1px solid #e2eaf4;">Precio del inmueble</td>
+      <td style="padding:10px 18px;font-size:16px;font-weight:800;color:#0d1f3c;text-align:right;border-bottom:1px solid #e2eaf4;">${outPrecio.textContent}</td>
     </tr>
     <tr style="-webkit-print-color-adjust:exact;print-color-adjust:exact;background:#f8fafd;">
-      <td style="padding:14px 28px;font-size:13px;color:#6b7a95;border-bottom:1px solid #e2eaf4;">Cuota inicial (${outCuotaPct.textContent}%)</td>
-      <td style="padding:14px 28px;font-size:20px;font-weight:800;color:#0d1f3c;text-align:right;border-bottom:1px solid #e2eaf4;">${outCuota.textContent}</td>
+      <td style="padding:10px 18px;font-size:13px;color:#6b7a95;border-bottom:1px solid #e2eaf4;">Cuota inicial (${outCuotaPct.textContent}%)</td>
+      <td style="padding:10px 18px;font-size:16px;font-weight:800;color:#0d1f3c;text-align:right;border-bottom:1px solid #e2eaf4;">${outCuota.textContent}</td>
     </tr>
     <tr style="-webkit-print-color-adjust:exact;print-color-adjust:exact;background:#fff;">
-      <td style="padding:14px 28px;font-size:13px;color:#6b7a95;border-bottom:1px solid #e2eaf4;">Monto a financiar</td>
-      <td style="padding:14px 28px;font-size:20px;font-weight:800;color:#0d1f3c;text-align:right;border-bottom:1px solid #e2eaf4;">${outMonto.textContent}</td>
+      <td style="padding:10px 18px;font-size:13px;color:#6b7a95;border-bottom:1px solid #e2eaf4;">Monto a financiar</td>
+      <td style="padding:10px 18px;font-size:16px;font-weight:800;color:#0d1f3c;text-align:right;border-bottom:1px solid #e2eaf4;">${outMonto.textContent}</td>
     </tr>
     <tr style="-webkit-print-color-adjust:exact;print-color-adjust:exact;background:#f8fafd;">
-      <td style="padding:14px 28px;font-size:13px;color:#6b7a95;border-bottom:1px solid #e2eaf4;">Plazo</td>
-      <td style="padding:14px 28px;font-size:20px;font-weight:800;color:#0d1f3c;text-align:right;border-bottom:1px solid #e2eaf4;">${outPlazo.textContent}</td>
+      <td style="padding:10px 18px;font-size:13px;color:#6b7a95;border-bottom:1px solid #e2eaf4;">Plazo</td>
+      <td style="padding:10px 18px;font-size:16px;font-weight:800;color:#0d1f3c;text-align:right;border-bottom:1px solid #e2eaf4;">${outPlazo.textContent}</td>
     </tr>
     <tr style="-webkit-print-color-adjust:exact;print-color-adjust:exact;background:#fff;">
-      <td style="padding:14px 28px;font-size:13px;color:#6b7a95;">TCEA</td>
-      <td style="padding:14px 28px;font-size:20px;font-weight:800;color:#0d1f3c;text-align:right;">${outTea.textContent}</td>
+      <td style="padding:10px 18px;font-size:13px;color:#6b7a95;">TCEA</td>
+      <td style="padding:10px 18px;font-size:16px;font-weight:800;color:#0d1f3c;text-align:right;">${outTea.textContent}</td>
     </tr>
   </table>
 
   <!-- ═══ CUOTA MENSUAL RESALTADA ═══ -->
   <table width="100%" cellpadding="0" cellspacing="0" style="-webkit-print-color-adjust:exact;print-color-adjust:exact;background:#0d1f3c;border-top:3px solid #b3202a;">
     <tr>
-      <td style="padding:18px 28px;vertical-align:middle;">
+      <td style="padding:12px 18px;vertical-align:middle;">
         <div style="font-size:12px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,.6);margin-bottom:5px;">CUOTA MENSUAL ESTIMADA</div>
-        <div style="font-size:32px;font-weight:800;color:#fff;">${cuotaMensual.textContent}</div>
+        <div style="font-size:22px;font-weight:800;color:#fff;">${cuotaMensual.textContent}</div>
       </td>
-      <td style="padding:18px 28px;vertical-align:middle;text-align:right;">
+      <td style="padding:12px 18px;vertical-align:middle;text-align:right;">
         <div style="font-size:11px;color:rgba(255,255,255,.45);">Ingreso mínimo referencial</div>
-        <div style="font-size:20px;font-weight:700;color:rgba(255,255,255,.85);margin-top:4px;">${outIngreso.textContent}</div>
+        <div style="font-size:15px;font-weight:700;color:rgba(255,255,255,.85);margin-top:4px;">${outIngreso.textContent}</div>
       </td>
     </tr>
   </table>
@@ -254,7 +254,7 @@ function descargarPDF() {
   <!-- ═══ FOOTER ═══ -->
   <table width="100%" cellpadding="0" cellspacing="0" style="-webkit-print-color-adjust:exact;print-color-adjust:exact;background:#f4f7fb;border-top:1px solid #e2eaf4;">
     <tr>
-      <td style="padding:14px 28px;font-size:11px;color:#6b7a95;text-align:center;line-height:1.6;">
+      <td style="padding:10px 18px;font-size:11px;color:#6b7a95;text-align:center;line-height:1.6;">
         Esta simulación es informativa y está sujeta a evaluación crediticia, políticas internas y condiciones comerciales vigentes.<br>
         <strong style="color:#0d1f3c;">Nattiva Estate</strong> · Plataforma Inmobiliaria de Inversión
       </td>
@@ -266,10 +266,10 @@ function descargarPDF() {
   const wrapper = document.createElement("div");
   wrapper.innerHTML = html;
   document.body.appendChild(wrapper);
-  wrapper.style.cssText = "position:absolute;left:-9999px;top:0;width:700px;";
+  wrapper.style.cssText = "position:absolute;left:-9999px;top:0;width:560px;";
 
   html2pdf().set({
-    margin:    [0.3, 0.3, 0.3, 0.3],
+    margin:    [0.5, 0.5, 0.5, 0.5],
     filename:  "Nattiva-Credito-" + name + ".pdf",
     image:     { type: "jpeg", quality: 1 },
     html2canvas: {
@@ -278,8 +278,8 @@ function descargarPDF() {
       backgroundColor: "#ffffff",
       logging:         false,
       allowTaint:      true,
-      width:           700,
-      windowWidth:     700
+      width:           560,
+      windowWidth:     560
     },
     jsPDF: { unit: "in", format: "a4", orientation: "portrait" },
     pagebreak: { mode: ["avoid-all"] }
