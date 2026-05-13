@@ -154,66 +154,66 @@ function descargarPDF() {
 <div style="font-family:Arial,Helvetica,sans-serif;font-size:13px;color:#0d1f3c;background:#ffffff;padding:0;margin:0;">
 
   <!-- HEADER AZUL -->
-  <div style="background:#0d1f3c;padding:24px 32px;margin-bottom:0;">
-    <p style="font-size:9px;font-weight:bold;letter-spacing:3px;text-transform:uppercase;color:rgba(255,255,255,0.5);margin:0 0 6px 0;">RESUMEN FINANCIERO</p>
-    <p style="font-size:22px;font-weight:bold;color:#ffffff;margin:0 0 4px 0;font-family:Georgia,serif;">Propuesta de crédito</p>
-    <p style="font-size:11px;color:rgba(255,255,255,0.5);margin:0;">Simulación generada para evaluación preliminar</p>
+  <div style="background:#0d1f3c;padding:30px 36px;margin-bottom:0;">
+    <p style="font-size:11px;font-weight:bold;letter-spacing:3px;text-transform:uppercase;color:rgba(255,255,255,0.5);margin:0 0 8px 0;">RESUMEN FINANCIERO</p>
+    <p style="font-size:28px;font-weight:bold;color:#ffffff;margin:0 0 6px 0;font-family:Georgia,serif;">Propuesta de crédito</p>
+    <p style="font-size:13px;color:rgba(255,255,255,0.5);margin:0;">Simulación generada para evaluación preliminar</p>
   </div>
 
   <!-- CUOTA MENSUAL — caja destacada -->
-  <div style="background:#7a0d14;padding:20px 32px;margin-bottom:0;">
-    <p style="font-size:9px;font-weight:bold;letter-spacing:3px;text-transform:uppercase;color:rgba(255,255,255,0.65);margin:0 0 6px 0;">CUOTA MENSUAL ESTIMADA</p>
-    <p style="font-size:32px;font-weight:bold;color:#ffffff;margin:0;letter-spacing:-1px;">${cuotaMensual.textContent}</p>
+  <div style="background:#7a0d14;padding:24px 36px;margin-bottom:0;">
+    <p style="font-size:11px;font-weight:bold;letter-spacing:3px;text-transform:uppercase;color:rgba(255,255,255,0.65);margin:0 0 8px 0;">CUOTA MENSUAL ESTIMADA</p>
+    <p style="font-size:38px;font-weight:bold;color:#ffffff;margin:0;letter-spacing:-1px;">${cuotaMensual.textContent}</p>
   </div>
 
   <!-- CLIENTE -->
-  <div style="background:#faf7f2;padding:16px 32px;border-bottom:1px solid #e2eaf4;">
-    <p style="font-size:9px;font-weight:bold;letter-spacing:2px;text-transform:uppercase;color:#6b7a95;margin:0 0 5px 0;">CLIENTE</p>
-    <p style="font-size:20px;font-weight:bold;color:#0d1f3c;margin:0;font-family:Georgia,serif;">${outCliente.textContent}</p>
-    <p style="font-size:10px;font-weight:bold;color:#b3202a;text-transform:uppercase;letter-spacing:1px;margin:6px 0 0 0;">Simulación referencial</p>
+  <div style="background:#faf7f2;padding:20px 36px;border-bottom:1px solid #e2eaf4;">
+    <p style="font-size:11px;font-weight:bold;letter-spacing:2px;text-transform:uppercase;color:#6b7a95;margin:0 0 6px 0;">CLIENTE</p>
+    <p style="font-size:26px;font-weight:bold;color:#0d1f3c;margin:0;font-family:Georgia,serif;">${outCliente.textContent}</p>
+    <p style="font-size:12px;font-weight:bold;color:#b3202a;text-transform:uppercase;letter-spacing:1px;margin:8px 0 0 0;">Simulación referencial</p>
   </div>
 
   <!-- MÉTRICAS -->
-  <div style="background:#fdf6e3;padding:16px 32px;border-bottom:1px solid #e2c840;">
-    <p style="font-size:10px;color:#6b7a95;margin:0 0 4px 0;">Ingreso mensual referencial</p>
-    <p style="font-size:22px;font-weight:bold;color:#0d1f3c;margin:0;">${outIngreso.textContent}</p>
+  <div style="background:#fdf6e3;padding:18px 36px;border-bottom:1px solid #e2c840;">
+    <p style="font-size:12px;color:#6b7a95;margin:0 0 5px 0;">Ingreso mensual referencial</p>
+    <p style="font-size:26px;font-weight:bold;color:#0d1f3c;margin:0;">${outIngreso.textContent}</p>
   </div>
-  <div style="background:#f8fafd;padding:16px 32px;border-bottom:1px solid #e2eaf4;">
-    <p style="font-size:10px;color:#6b7a95;margin:0 0 4px 0;">Monto a financiar</p>
-    <p style="font-size:22px;font-weight:bold;color:#0d1f3c;margin:0;">${outMonto.textContent}</p>
+  <div style="background:#f8fafd;padding:18px 36px;border-bottom:1px solid #e2eaf4;">
+    <p style="font-size:12px;color:#6b7a95;margin:0 0 5px 0;">Monto a financiar</p>
+    <p style="font-size:26px;font-weight:bold;color:#0d1f3c;margin:0;">${outMonto.textContent}</p>
   </div>
 
   <!-- TITULO DETALLE -->
-  <div style="padding:16px 32px 8px 32px;background:#ffffff;">
-    <p style="font-size:15px;font-weight:bold;color:#0d1f3c;margin:0;font-family:Georgia,serif;">Detalle de la operación</p>
-    <p style="font-size:10px;color:#6b7a95;margin:4px 0 0 0;">Variables consideradas en la simulación</p>
+  <div style="padding:18px 36px 8px 36px;background:#ffffff;">
+    <p style="font-size:22px;font-weight:bold;color:#0d1f3c;margin:0;font-family:Georgia,serif;">Detalle de la operación</p>
+    <p style="font-size:12px;color:#6b7a95;margin:5px 0 0 0;">Variables consideradas en la simulación</p>
   </div>
 
   <!-- FILAS DETALLE -->
-  <div style="background:#ffffff;padding:12px 32px;border-top:1px solid #e2eaf4;border-bottom:1px solid #e2eaf4;">
-    <p style="font-size:11px;color:#6b7a95;margin:0 0 3px 0;">Precio del inmueble</p>
-    <p style="font-size:18px;font-weight:bold;color:#0d1f3c;margin:0;">${outPrecio.textContent}</p>
+  <div style="background:#ffffff;padding:14px 36px;border-top:1px solid #e2eaf4;border-bottom:1px solid #e2eaf4;">
+    <p style="font-size:13px;color:#6b7a95;margin:0 0 4px 0;">Precio del inmueble</p>
+    <p style="font-size:22px;font-weight:bold;color:#0d1f3c;margin:0;">${outPrecio.textContent}</p>
   </div>
-  <div style="background:#f8fafd;padding:12px 32px;border-bottom:1px solid #e2eaf4;">
-    <p style="font-size:11px;color:#6b7a95;margin:0 0 3px 0;">Cuota inicial (${outCuotaPct.textContent}%)</p>
-    <p style="font-size:18px;font-weight:bold;color:#0d1f3c;margin:0;">${outCuota.textContent}</p>
+  <div style="background:#f8fafd;padding:14px 36px;border-bottom:1px solid #e2eaf4;">
+    <p style="font-size:13px;color:#6b7a95;margin:0 0 4px 0;">Cuota inicial (${outCuotaPct.textContent}%)</p>
+    <p style="font-size:22px;font-weight:bold;color:#0d1f3c;margin:0;">${outCuota.textContent}</p>
   </div>
-  <div style="background:#ffffff;padding:12px 32px;border-bottom:1px solid #e2eaf4;">
-    <p style="font-size:11px;color:#6b7a95;margin:0 0 3px 0;">Monto a financiar</p>
-    <p style="font-size:18px;font-weight:bold;color:#0d1f3c;margin:0;">${outMonto.textContent}</p>
+  <div style="background:#ffffff;padding:14px 36px;border-bottom:1px solid #e2eaf4;">
+    <p style="font-size:13px;color:#6b7a95;margin:0 0 4px 0;">Monto a financiar</p>
+    <p style="font-size:22px;font-weight:bold;color:#0d1f3c;margin:0;">${outMonto.textContent}</p>
   </div>
-  <div style="background:#f8fafd;padding:12px 32px;border-bottom:1px solid #e2eaf4;">
-    <p style="font-size:11px;color:#6b7a95;margin:0 0 3px 0;">Plazo</p>
-    <p style="font-size:18px;font-weight:bold;color:#0d1f3c;margin:0;">${outPlazo.textContent}</p>
+  <div style="background:#f8fafd;padding:14px 36px;border-bottom:1px solid #e2eaf4;">
+    <p style="font-size:13px;color:#6b7a95;margin:0 0 4px 0;">Plazo</p>
+    <p style="font-size:22px;font-weight:bold;color:#0d1f3c;margin:0;">${outPlazo.textContent}</p>
   </div>
-  <div style="background:#ffffff;padding:12px 32px;border-bottom:1px solid #e2eaf4;">
-    <p style="font-size:11px;color:#6b7a95;margin:0 0 3px 0;">TCEA</p>
-    <p style="font-size:18px;font-weight:bold;color:#0d1f3c;margin:0;">${outTea.textContent}</p>
+  <div style="background:#ffffff;padding:14px 36px;border-bottom:1px solid #e2eaf4;">
+    <p style="font-size:13px;color:#6b7a95;margin:0 0 4px 0;">TCEA</p>
+    <p style="font-size:22px;font-weight:bold;color:#0d1f3c;margin:0;">${outTea.textContent}</p>
   </div>
 
   <!-- FOOTER -->
-  <div style="background:#f4f7fb;padding:14px 32px;border-top:2px solid #0d1f3c;">
-    <p style="font-size:10px;color:#6b7a95;text-align:center;margin:0;line-height:1.6;">
+  <div style="background:#f4f7fb;padding:18px 36px;border-top:2px solid #0d1f3c;">
+    <p style="font-size:12px;color:#6b7a95;text-align:center;margin:0;line-height:1.6;">
       Esta simulación es informativa y está sujeta a evaluación crediticia, políticas internas y condiciones comerciales vigentes.<br>
       <strong style="color:#0d1f3c;">Nattiva Estate</strong> · Plataforma de Inversión Inmobiliaria
     </p>
@@ -231,13 +231,14 @@ function descargarPDF() {
     filename:    "Nattiva-Credito-" + name + ".pdf",
     image:       { type: "jpeg", quality: 0.98 },
     html2canvas: {
-      scale:           2,
+      scale:           3,
       useCORS:         true,
       backgroundColor: "#ffffff",
       logging:         false,
       allowTaint:      true,
       width:           595,
-      windowWidth:     595
+      windowWidth:     595,
+      height:          842
     },
     jsPDF: { unit: "pt", format: "a4", orientation: "portrait" },
     pagebreak: { mode: ["avoid-all"] }
