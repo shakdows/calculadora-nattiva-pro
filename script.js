@@ -28,7 +28,6 @@ const outPlazo     = document.getElementById("outPlazo");
 const outTea       = document.getElementById("outTea");
 const outIngreso   = document.getElementById("outIngreso");
 
-/* ── Slideshow ── */
 function initSlideshow() {
   const slides = document.querySelectorAll(".login-bg-slide");
   if (!slides.length) return;
@@ -40,7 +39,6 @@ function initSlideshow() {
   }, 4500);
 }
 
-/* ── Inputs ── */
 function cleanNum(v) { return v.replace(/[^\d.,]/g, ""); }
 function num(v) { return parseFloat((v || "").replace(/,/g, "")) || 0; }
 
@@ -51,7 +49,6 @@ plazo.addEventListener("input",   () => { plazo.value   = plazo.value.replace(/[
 cliente.addEventListener("input", () => { cliente.value = cliente.value.replace(/[0-9]/g, ""); });
 passwordInput.addEventListener("keydown", e => { if (e.key === "Enter") checkPassword(); });
 
-/* ── Auth ── */
 function checkPassword() {
   if (passwordInput.value.trim() === correctPassword) {
     loginScreen.style.display = "none";
@@ -64,7 +61,6 @@ function checkPassword() {
   }
 }
 
-/* ── Calcular ── */
 function calcular() {
   err.textContent = "";
   const nombre = cliente.value.trim();
@@ -98,7 +94,6 @@ function calcular() {
   window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
-/* ── Reset ── */
 function resetear() {
   form.classList.remove("hide");
   result.classList.add("hide");
@@ -107,7 +102,6 @@ function resetear() {
   window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
-/* ── Compartir ── */
 function generarTexto() {
   return (
     "📊 *Propuesta de crédito Nattiva*\n\n" +
@@ -141,7 +135,10 @@ async function compartirGeneral() {
   }
 }
 
-/* ── PDF — usa TABLE layout para máxima compatibilidad con html2pdf ── */
+/* ══════════════════════════════════════════════
+   PDF — diseño en UNA SOLA COLUMNA, sin flex/grid
+   para garantizar renderizado correcto en html2pdf
+══════════════════════════════════════════════ */
 function descargarPDF() {
   if (typeof html2pdf === "undefined") { alert("Librería PDF no cargada."); return; }
 
@@ -153,143 +150,102 @@ function descargarPDF() {
     ? document.querySelector(".result-main-logo").src
     : "";
 
-  /* ── HTML 100% con TABLE layout — sin flex/grid — html2pdf lo renderiza perfectamente ── */
   const html = `
-<div style="font-family:Arial,sans-serif;color:#0d1f3c;width:794px;margin:0;border:1px solid #e2eaf4;border-radius:0;overflow:hidden;">
+<div style="font-family:Arial,Helvetica,sans-serif;font-size:13px;color:#0d1f3c;background:#ffffff;padding:0;margin:0;">
 
-  <!-- ═══ HEADER ═══ -->
-  <table width="100%" cellpadding="0" cellspacing="0" style="-webkit-print-color-adjust:exact;print-color-adjust:exact;background:#0d1f3c;background-image:linear-gradient(135deg,#0d1f3c 0%,#1a2f55 50%,#6e0e14 100%);">
-    <tr>
-      <td style="padding:26px 26px 26px 22px;vertical-align:middle;">
-        ${logoSrc ? `<img src="${logoSrc}" style="width:80px;height:auto;border-radius:8px;display:block;" />` : ''}
-      </td>
-      <td style="padding:26px 10px;vertical-align:middle;">
-        <div style="font-size:9px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:rgba(255,255,255,.55);margin-bottom:5px;">RESUMEN FINANCIERO</div>
-        <div style="font-family:Georgia,serif;font-size:18px;font-weight:800;color:#fff;line-height:1.1;">Propuesta de crédito</div>
-        <div style="font-size:11px;color:rgba(255,255,255,.5);margin-top:5px;">Simulación generada para evaluación preliminar</div>
-      </td>
-      <td style="padding:20px 22px 20px 10px;vertical-align:middle;text-align:right;white-space:nowrap;">
-        <div style="-webkit-print-color-adjust:exact;print-color-adjust:exact;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.25);border-radius:14px;padding:18px 26px;display:inline-block;text-align:center;min-width:160px;">
-          <div style="font-size:9px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,.65);margin-bottom:7px;">CUOTA MENSUAL ESTIMADA</div>
-          <div style="font-size:28px;font-weight:800;color:#fff;letter-spacing:-.01em;">${cuotaMensual.textContent}</div>
-        </div>
-      </td>
-    </tr>
-  </table>
+  <!-- HEADER AZUL -->
+  <div style="background:#0d1f3c;padding:24px 32px;margin-bottom:0;">
+    <p style="font-size:9px;font-weight:bold;letter-spacing:3px;text-transform:uppercase;color:rgba(255,255,255,0.5);margin:0 0 6px 0;">RESUMEN FINANCIERO</p>
+    <p style="font-size:22px;font-weight:bold;color:#ffffff;margin:0 0 4px 0;font-family:Georgia,serif;">Propuesta de crédito</p>
+    <p style="font-size:11px;color:rgba(255,255,255,0.5);margin:0;">Simulación generada para evaluación preliminar</p>
+  </div>
 
-  <!-- ═══ CLIENTE ═══ -->
-  <table width="100%" cellpadding="0" cellspacing="0" style="-webkit-print-color-adjust:exact;print-color-adjust:exact;background:#faf7f2;border-bottom:1px solid #e2eaf4;">
-    <tr>
-      <td style="padding:16px 26px;vertical-align:middle;">
-        <div style="font-size:9px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:#6b7a95;margin-bottom:5px;">CLIENTE</div>
-        <div style="font-family:Georgia,serif;font-size:22px;font-weight:700;color:#0d1f3c;">${outCliente.textContent}</div>
-      </td>
-      <td style="padding:16px 26px;vertical-align:middle;text-align:right;">
-        <span style="-webkit-print-color-adjust:exact;print-color-adjust:exact;display:inline-block;padding:6px 14px;border-radius:999px;background:#fde8ea;border:1px solid rgba(179,32,42,.2);color:#b3202a;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.09em;">Simulación referencial</span>
-      </td>
-    </tr>
-  </table>
+  <!-- CUOTA MENSUAL — caja destacada -->
+  <div style="background:#7a0d14;padding:20px 32px;margin-bottom:0;">
+    <p style="font-size:9px;font-weight:bold;letter-spacing:3px;text-transform:uppercase;color:rgba(255,255,255,0.65);margin:0 0 6px 0;">CUOTA MENSUAL ESTIMADA</p>
+    <p style="font-size:32px;font-weight:bold;color:#ffffff;margin:0;letter-spacing:-1px;">${cuotaMensual.textContent}</p>
+  </div>
 
-  <!-- ═══ MÉTRICAS ═══ -->
-  <table width="100%" cellpadding="0" cellspacing="0" style="border-bottom:1px solid #e2eaf4;">
-    <tr>
-      <td width="50%" style="-webkit-print-color-adjust:exact;print-color-adjust:exact;background:#fdf6e3;padding:18px 26px;border-right:1px solid rgba(232,184,75,.3);vertical-align:top;">
-        <div style="font-size:11px;color:#6b7a95;margin-bottom:8px;font-weight:500;">Ingreso mensual referencial</div>
-        <div style="font-size:26px;font-weight:800;color:#0d1f3c;letter-spacing:-.02em;">${outIngreso.textContent}</div>
-      </td>
-      <td width="50%" style="-webkit-print-color-adjust:exact;print-color-adjust:exact;background:#f8fafd;padding:18px 26px;vertical-align:top;">
-        <div style="font-size:11px;color:#6b7a95;margin-bottom:8px;font-weight:500;">Monto a financiar</div>
-        <div style="font-size:26px;font-weight:800;color:#0d1f3c;letter-spacing:-.02em;">${outMonto.textContent}</div>
-      </td>
-    </tr>
-  </table>
+  <!-- CLIENTE -->
+  <div style="background:#faf7f2;padding:16px 32px;border-bottom:1px solid #e2eaf4;">
+    <p style="font-size:9px;font-weight:bold;letter-spacing:2px;text-transform:uppercase;color:#6b7a95;margin:0 0 5px 0;">CLIENTE</p>
+    <p style="font-size:20px;font-weight:bold;color:#0d1f3c;margin:0;font-family:Georgia,serif;">${outCliente.textContent}</p>
+    <p style="font-size:10px;font-weight:bold;color:#b3202a;text-transform:uppercase;letter-spacing:1px;margin:6px 0 0 0;">Simulación referencial</p>
+  </div>
 
-  <!-- ═══ DETALLE ═══ -->
-  <table width="100%" cellpadding="0" cellspacing="0" style="background:#fff;">
-    <tr>
-      <td colspan="2" style="padding:20px 28px 12px;">
-        <span style="font-family:Georgia,serif;font-size:16px;font-weight:700;color:#0d1f3c;">Detalle de la operación</span>
-        <span style="font-size:11px;color:#6b7a95;margin-left:10px;">Variables consideradas en la simulación</span>
-      </td>
-    </tr>
-  </table>
+  <!-- MÉTRICAS -->
+  <div style="background:#fdf6e3;padding:16px 32px;border-bottom:1px solid #e2c840;">
+    <p style="font-size:10px;color:#6b7a95;margin:0 0 4px 0;">Ingreso mensual referencial</p>
+    <p style="font-size:22px;font-weight:bold;color:#0d1f3c;margin:0;">${outIngreso.textContent}</p>
+  </div>
+  <div style="background:#f8fafd;padding:16px 32px;border-bottom:1px solid #e2eaf4;">
+    <p style="font-size:10px;color:#6b7a95;margin:0 0 4px 0;">Monto a financiar</p>
+    <p style="font-size:22px;font-weight:bold;color:#0d1f3c;margin:0;">${outMonto.textContent}</p>
+  </div>
 
-  <table width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 0 0;border-top:1px solid #e2eaf4;">
-    <tr style="-webkit-print-color-adjust:exact;print-color-adjust:exact;background:#fff;">
-      <td style="padding:14px 26px;font-size:13px;color:#6b7a95;border-bottom:1px solid #e2eaf4;">Precio del inmueble</td>
-      <td style="padding:14px 26px;font-size:20px;font-weight:800;color:#0d1f3c;text-align:right;border-bottom:1px solid #e2eaf4;">${outPrecio.textContent}</td>
-    </tr>
-    <tr style="-webkit-print-color-adjust:exact;print-color-adjust:exact;background:#f8fafd;">
-      <td style="padding:14px 26px;font-size:13px;color:#6b7a95;border-bottom:1px solid #e2eaf4;">Cuota inicial (${outCuotaPct.textContent}%)</td>
-      <td style="padding:14px 26px;font-size:20px;font-weight:800;color:#0d1f3c;text-align:right;border-bottom:1px solid #e2eaf4;">${outCuota.textContent}</td>
-    </tr>
-    <tr style="-webkit-print-color-adjust:exact;print-color-adjust:exact;background:#fff;">
-      <td style="padding:14px 26px;font-size:13px;color:#6b7a95;border-bottom:1px solid #e2eaf4;">Monto a financiar</td>
-      <td style="padding:14px 26px;font-size:20px;font-weight:800;color:#0d1f3c;text-align:right;border-bottom:1px solid #e2eaf4;">${outMonto.textContent}</td>
-    </tr>
-    <tr style="-webkit-print-color-adjust:exact;print-color-adjust:exact;background:#f8fafd;">
-      <td style="padding:14px 26px;font-size:13px;color:#6b7a95;border-bottom:1px solid #e2eaf4;">Plazo</td>
-      <td style="padding:14px 26px;font-size:20px;font-weight:800;color:#0d1f3c;text-align:right;border-bottom:1px solid #e2eaf4;">${outPlazo.textContent}</td>
-    </tr>
-    <tr style="-webkit-print-color-adjust:exact;print-color-adjust:exact;background:#fff;">
-      <td style="padding:14px 26px;font-size:13px;color:#6b7a95;">TCEA</td>
-      <td style="padding:14px 26px;font-size:20px;font-weight:800;color:#0d1f3c;text-align:right;">${outTea.textContent}</td>
-    </tr>
-  </table>
+  <!-- TITULO DETALLE -->
+  <div style="padding:16px 32px 8px 32px;background:#ffffff;">
+    <p style="font-size:15px;font-weight:bold;color:#0d1f3c;margin:0;font-family:Georgia,serif;">Detalle de la operación</p>
+    <p style="font-size:10px;color:#6b7a95;margin:4px 0 0 0;">Variables consideradas en la simulación</p>
+  </div>
 
-  <!-- ═══ CUOTA MENSUAL RESALTADA ═══ -->
-  <table width="100%" cellpadding="0" cellspacing="0" style="-webkit-print-color-adjust:exact;print-color-adjust:exact;background:#0d1f3c;border-top:3px solid #b3202a;">
-    <tr>
-      <td style="padding:16px 26px;vertical-align:middle;">
-        <div style="font-size:12px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,.6);margin-bottom:5px;">CUOTA MENSUAL ESTIMADA</div>
-        <div style="font-size:30px;font-weight:800;color:#fff;">${cuotaMensual.textContent}</div>
-      </td>
-      <td style="padding:16px 26px;vertical-align:middle;text-align:right;">
-        <div style="font-size:11px;color:rgba(255,255,255,.45);">Ingreso mínimo referencial</div>
-        <div style="font-size:15px;font-weight:700;color:rgba(255,255,255,.85);margin-top:4px;">${outIngreso.textContent}</div>
-      </td>
-    </tr>
-  </table>
+  <!-- FILAS DETALLE -->
+  <div style="background:#ffffff;padding:12px 32px;border-top:1px solid #e2eaf4;border-bottom:1px solid #e2eaf4;">
+    <p style="font-size:11px;color:#6b7a95;margin:0 0 3px 0;">Precio del inmueble</p>
+    <p style="font-size:18px;font-weight:bold;color:#0d1f3c;margin:0;">${outPrecio.textContent}</p>
+  </div>
+  <div style="background:#f8fafd;padding:12px 32px;border-bottom:1px solid #e2eaf4;">
+    <p style="font-size:11px;color:#6b7a95;margin:0 0 3px 0;">Cuota inicial (${outCuotaPct.textContent}%)</p>
+    <p style="font-size:18px;font-weight:bold;color:#0d1f3c;margin:0;">${outCuota.textContent}</p>
+  </div>
+  <div style="background:#ffffff;padding:12px 32px;border-bottom:1px solid #e2eaf4;">
+    <p style="font-size:11px;color:#6b7a95;margin:0 0 3px 0;">Monto a financiar</p>
+    <p style="font-size:18px;font-weight:bold;color:#0d1f3c;margin:0;">${outMonto.textContent}</p>
+  </div>
+  <div style="background:#f8fafd;padding:12px 32px;border-bottom:1px solid #e2eaf4;">
+    <p style="font-size:11px;color:#6b7a95;margin:0 0 3px 0;">Plazo</p>
+    <p style="font-size:18px;font-weight:bold;color:#0d1f3c;margin:0;">${outPlazo.textContent}</p>
+  </div>
+  <div style="background:#ffffff;padding:12px 32px;border-bottom:1px solid #e2eaf4;">
+    <p style="font-size:11px;color:#6b7a95;margin:0 0 3px 0;">TCEA</p>
+    <p style="font-size:18px;font-weight:bold;color:#0d1f3c;margin:0;">${outTea.textContent}</p>
+  </div>
 
-  <!-- ═══ FOOTER ═══ -->
-  <table width="100%" cellpadding="0" cellspacing="0" style="-webkit-print-color-adjust:exact;print-color-adjust:exact;background:#f4f7fb;border-top:1px solid #e2eaf4;">
-    <tr>
-      <td style="padding:14px 26px;font-size:11px;color:#6b7a95;text-align:center;line-height:1.6;">
-        Esta simulación es informativa y está sujeta a evaluación crediticia, políticas internas y condiciones comerciales vigentes.<br>
-        <strong style="color:#0d1f3c;">Nattiva Estate</strong> · Plataforma Inmobiliaria de Inversión
-      </td>
-    </tr>
-  </table>
+  <!-- FOOTER -->
+  <div style="background:#f4f7fb;padding:14px 32px;border-top:2px solid #0d1f3c;">
+    <p style="font-size:10px;color:#6b7a95;text-align:center;margin:0;line-height:1.6;">
+      Esta simulación es informativa y está sujeta a evaluación crediticia, políticas internas y condiciones comerciales vigentes.<br>
+      <strong style="color:#0d1f3c;">Nattiva Estate</strong> · Plataforma de Inversión Inmobiliaria
+    </p>
+  </div>
 
 </div>`;
 
   const wrapper = document.createElement("div");
   wrapper.innerHTML = html;
+  wrapper.style.cssText = "position:fixed;left:-9999px;top:0;width:595px;background:#fff;";
   document.body.appendChild(wrapper);
-  // Position offscreen but with exact A4 content width
-  wrapper.style.cssText = "position:fixed;left:-9999px;top:0;width:794px;padding:0;margin:0;";
 
   html2pdf().set({
-    margin:    0,
-    filename:  "Nattiva-Credito-" + name + ".pdf",
-    image:     { type: "jpeg", quality: 0.98 },
+    margin:      0,
+    filename:    "Nattiva-Credito-" + name + ".pdf",
+    image:       { type: "jpeg", quality: 0.98 },
     html2canvas: {
       scale:           2,
       useCORS:         true,
       backgroundColor: "#ffffff",
       logging:         false,
       allowTaint:      true,
-      width:           794,
-      windowWidth:     794
+      width:           595,
+      windowWidth:     595
     },
-    jsPDF: { unit: "px", format: [794, 1123], orientation: "portrait" },
+    jsPDF: { unit: "pt", format: "a4", orientation: "portrait" },
     pagebreak: { mode: ["avoid-all"] }
   }).from(wrapper.firstElementChild).save().then(() => {
     document.body.removeChild(wrapper);
   });
 }
 
-/* ── Init ── */
 window.addEventListener("load", () => {
   initSlideshow();
   setTimeout(() => {
