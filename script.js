@@ -93,6 +93,14 @@ function calcular() {
   outTea.textContent       = t + " %";
   outIngreso.textContent   = "S/ " + nf.format(ing);
 
+  // Guardamos la simulación para el cronograma francés
+  simActual = {
+    nombre, precio: p, cuotaInicialPct: c, cuotaInicial: ci,
+    montoFinanciado: mf, tasaMensual: r, meses: m, anios: a, tcea: t, cuotaMensual: cm,
+    tabla: generarCronograma(mf, r, m, cm)
+  };
+  vistaAmort = "anual";
+
   form.classList.add("hide");
   result.classList.remove("hide");
   window.scrollTo({ top: 0, behavior: "smooth" });
@@ -100,6 +108,8 @@ function calcular() {
 
 /* ── Reset ── */
 function resetear() {
+  cerrarAmortizacion();
+  simActual = null;
   form.classList.remove("hide");
   result.classList.add("hide");
   cliente.value = precio.value = cuota.value = tea.value = plazo.value = "";
@@ -245,6 +255,294 @@ function descargarPDF() {
     },
     jsPDF: { unit: "in", format: "a4", orientation: "portrait" },
     pagebreak: { mode: ["avoid-all"] }
+  }).from(wrapper.firstElementChild).save().then(() => {
+    document.body.removeChild(wrapper);
+  });
+}
+
+/* ══════════════════════════════════════════════
+   CRONOGRAMA DE AMORTIZACIÓN — MÉTODO FRANCÉS
+   Cuota constante: interés = saldo × i ;
+   amortización = cuota − interés ; saldo -= amortización
+   ══════════════════════════════════════════════ */
+
+let simActual  = null;
+let vistaAmort = "anual";
+
+const amortModal     = document.getElementById("amortModal");
+const amortCliente   = document.getElementById("amortCliente");
+const amortSummary   = document.getElementById("amortSummary");
+const amortTableWrap = document.getElementById("amortTableWrap");
+
+function generarCronograma(saldoInicial, i, meses, cuota) {
+  const filas = [];
+  let saldo = saldoInicial;
+
+  for (let n = 1; n <= meses; n++) {
+    const interes = saldo * i;
+    let amortizacion = cuota - interes;
+    let pago = cuota;
+
+    // Última cuota: se cancela el saldo exacto (ajuste de redondeo)
+    if (n === meses) { amortizacion = saldo; pago = saldo + interes; }
+
+    const saldoFinal = Math.max(saldo - amortizacion, 0);
+    filas.push({ n, saldoInicial: saldo, cuota: pago, interes, amortizacion, saldoFinal });
+    saldo = saldoFinal;
+  }
+  return filas;
+}
+
+function agruparPorAnio(filas) {
+  const anios = [];
+  filas.forEach(f => {
+    const idx = Math.ceil(f.n / 12) - 1;
+    if (!anios[idx]) {
+      anios[idx] = { n: idx + 1, saldoInicial: f.saldoInicial, cuota: 0, interes: 0, amortizacion: 0, saldoFinal: 0 };
+    }
+    anios[idx].cuota        += f.cuota;
+    anios[idx].interes      += f.interes;
+    anios[idx].amortizacion += f.amortizacion;
+    anios[idx].saldoFinal    = f.saldoFinal;
+  });
+  return anios;
+}
+
+function totalesCronograma(filas) {
+  return filas.reduce((t, f) => {
+    t.pagado += f.cuota; t.interes += f.interes; return t;
+  }, { pagado: 0, interes: 0 });
+}
+
+/* ── Abrir / cerrar ── */
+function verAmortizacion() {
+  if (!simActual) { alert("Primero realiza un cálculo."); return; }
+  renderAmortizacion();
+  amortModal.classList.remove("hide");
+  document.body.classList.add("amort-open");
+}
+
+function cerrarAmortizacion() {
+  if (!amortModal) return;
+  amortModal.classList.add("hide");
+  document.body.classList.remove("amort-open");
+}
+
+function cambiarVistaAmort(vista) {
+  vistaAmort = vista;
+  document.querySelectorAll(".amort-tab").forEach(b => {
+    b.classList.toggle("active", b.dataset.vista === vista);
+  });
+  renderTablaAmort();
+  amortTableWrap.scrollTop = 0;
+}
+
+document.addEventListener("keydown", e => {
+  if (e.key === "Escape") cerrarAmortizacion();
+});
+
+/* ── Render ── */
+function renderAmortizacion() {
+  const s = simActual;
+  const t = totalesCronograma(s.tabla);
+
+  amortCliente.textContent =
+    s.nombre + " · " + s.anios + " años (" + s.meses + " cuotas) · TCEA " + s.tcea + "%";
+
+  amortSummary.innerHTML = `
+    <div class="amort-sum-item">
+      <div class="amort-sum-label">Monto financiado</div>
+      <div class="amort-sum-value">S/ ${nf.format(s.montoFinanciado)}</div>
+    </div>
+    <div class="amort-sum-item gold">
+      <div class="amort-sum-label">Cuota mensual</div>
+      <div class="amort-sum-value">S/ ${nf.format(s.cuotaMensual)}</div>
+    </div>
+    <div class="amort-sum-item">
+      <div class="amort-sum-label">Total intereses</div>
+      <div class="amort-sum-value">S/ ${nf.format(t.interes)}</div>
+    </div>
+    <div class="amort-sum-item">
+      <div class="amort-sum-label">Total a pagar</div>
+      <div class="amort-sum-value">S/ ${nf.format(t.pagado)}</div>
+    </div>
+  `;
+
+  renderTablaAmort();
+}
+
+function renderTablaAmort() {
+  const s = simActual;
+  const anual = vistaAmort === "anual";
+  const filas = anual ? agruparPorAnio(s.tabla) : s.tabla;
+  const t     = totalesCronograma(s.tabla);
+  const etiq  = anual ? "Año" : "Cuota";
+
+  const cuerpo = filas.map(f => `
+    <tr>
+      <td>${etiq} ${f.n}</td>
+      <td>${nf.format(f.saldoInicial)}</td>
+      <td>${nf.format(f.cuota)}</td>
+      <td class="col-interes">${nf.format(f.interes)}</td>
+      <td class="col-amort">${nf.format(f.amortizacion)}</td>
+      <td class="col-saldo">${nf.format(f.saldoFinal)}</td>
+    </tr>`).join("");
+
+  amortTableWrap.innerHTML = `
+    <table class="amort-table">
+      <thead>
+        <tr>
+          <th>${anual ? "Periodo" : "N°"}</th>
+          <th>Saldo inicial</th>
+          <th>Cuota</th>
+          <th>Interés</th>
+          <th>Amortización</th>
+          <th>Saldo final</th>
+        </tr>
+      </thead>
+      <tbody>${cuerpo}</tbody>
+      <tfoot>
+        <tr>
+          <td>Totales</td>
+          <td>—</td>
+          <td>${nf.format(t.pagado)}</td>
+          <td>${nf.format(t.interes)}</td>
+          <td>${nf.format(s.montoFinanciado)}</td>
+          <td>0.00</td>
+        </tr>
+      </tfoot>
+    </table>
+  `;
+}
+
+/* ── Exportar CSV (abre en Excel) ── */
+function descargarCronogramaCSV() {
+  if (!simActual) return;
+  const s = simActual;
+  const t = totalesCronograma(s.tabla);
+
+  const lineas = [
+    ["Cliente", s.nombre],
+    ["Precio del inmueble", s.precio.toFixed(2)],
+    ["Cuota inicial (" + s.cuotaInicialPct + "%)", s.cuotaInicial.toFixed(2)],
+    ["Monto financiado", s.montoFinanciado.toFixed(2)],
+    ["TCEA (%)", s.tcea],
+    ["Tasa efectiva mensual (%)", (s.tasaMensual * 100).toFixed(6)],
+    ["Plazo (meses)", s.meses],
+    ["Cuota mensual", s.cuotaMensual.toFixed(2)],
+    ["Total intereses", t.interes.toFixed(2)],
+    ["Total a pagar", t.pagado.toFixed(2)],
+    [],
+    ["N", "Saldo inicial", "Cuota", "Interes", "Amortizacion", "Saldo final"]
+  ];
+
+  s.tabla.forEach(f => lineas.push([
+    f.n, f.saldoInicial.toFixed(2), f.cuota.toFixed(2),
+    f.interes.toFixed(2), f.amortizacion.toFixed(2), f.saldoFinal.toFixed(2)
+  ]));
+
+  const csv = "\ufeff" + lineas.map(l => l.map(v => `"${v}"`).join(",")).join("\r\n");
+  const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement("a");
+  a.href = url;
+  a.download = "Cronograma-" + nombreArchivo() + ".csv";
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function nombreArchivo() {
+  return simActual && simActual.nombre
+    ? simActual.nombre.replace(/[^\w\s-]/g, "").replace(/\s+/g, "-")
+    : "Cliente";
+}
+
+/* ── Exportar cronograma a PDF ── */
+function descargarCronogramaPDF() {
+  if (!simActual) return;
+  if (typeof html2pdf === "undefined") { alert("Librería PDF no cargada."); return; }
+
+  const s = simActual;
+  const t = totalesCronograma(s.tabla);
+  const logo = document.querySelector(".result-main-logo");
+  const logoSrc = logo ? logo.src : "";
+
+  const filas = s.tabla.map(f => `
+    <tr style="page-break-inside:avoid;">
+      <td style="padding:5px 8px; font-size:9px; border-bottom:1px solid #e2eaf4; font-weight:700; color:#0d1f3c;">${f.n}</td>
+      <td style="padding:5px 8px; font-size:9px; border-bottom:1px solid #e2eaf4; text-align:right; color:#6b7a95;">${nf.format(f.saldoInicial)}</td>
+      <td style="padding:5px 8px; font-size:9px; border-bottom:1px solid #e2eaf4; text-align:right; font-weight:700; color:#0d1f3c;">${nf.format(f.cuota)}</td>
+      <td style="padding:5px 8px; font-size:9px; border-bottom:1px solid #e2eaf4; text-align:right; color:#b3202a;">${nf.format(f.interes)}</td>
+      <td style="padding:5px 8px; font-size:9px; border-bottom:1px solid #e2eaf4; text-align:right; color:#128c3a;">${nf.format(f.amortizacion)}</td>
+      <td style="padding:5px 8px; font-size:9px; border-bottom:1px solid #e2eaf4; text-align:right; font-weight:700; color:#0d1f3c;">${nf.format(f.saldoFinal)}</td>
+    </tr>`).join("");
+
+  const html = `
+    <div style="font-family:'Inter',Arial,sans-serif; color:#0d1f3c; width:100%; max-width:720px; margin:0 auto;">
+
+      <div style="background:#0d1f3c; padding:20px 24px; display:flex; align-items:center; gap:14px;">
+        ${logoSrc ? `<img src="${logoSrc}" style="width:78px; height:auto; border-radius:8px;" />` : ""}
+        <div>
+          <div style="font-size:9px; font-weight:700; letter-spacing:.2em; text-transform:uppercase; color:rgba(255,255,255,.55); margin-bottom:4px;">MÉTODO FRANCÉS · CUOTA CONSTANTE</div>
+          <div style="font-family:Georgia,serif; font-size:22px; font-weight:800; color:#fff;">Cronograma de amortización</div>
+          <div style="font-size:10px; color:rgba(255,255,255,.6); margin-top:4px;">${s.nombre} · ${s.anios} años (${s.meses} cuotas) · TCEA ${s.tcea}%</div>
+        </div>
+      </div>
+
+      <table style="width:100%; border-collapse:collapse; border-bottom:1px solid #e2eaf4;">
+        <tr>
+          <td style="padding:10px 14px; background:#f8fafd; border-right:1px solid #e2eaf4;">
+            <div style="font-size:8px; letter-spacing:.1em; text-transform:uppercase; color:#6b7a95; font-weight:700;">Monto financiado</div>
+            <div style="font-size:14px; font-weight:800;">S/ ${nf.format(s.montoFinanciado)}</div>
+          </td>
+          <td style="padding:10px 14px; background:#fdf6e3; border-right:1px solid #e2eaf4;">
+            <div style="font-size:8px; letter-spacing:.1em; text-transform:uppercase; color:#6b7a95; font-weight:700;">Cuota mensual</div>
+            <div style="font-size:14px; font-weight:800;">S/ ${nf.format(s.cuotaMensual)}</div>
+          </td>
+          <td style="padding:10px 14px; background:#f8fafd; border-right:1px solid #e2eaf4;">
+            <div style="font-size:8px; letter-spacing:.1em; text-transform:uppercase; color:#6b7a95; font-weight:700;">Total intereses</div>
+            <div style="font-size:14px; font-weight:800;">S/ ${nf.format(t.interes)}</div>
+          </td>
+          <td style="padding:10px 14px; background:#f8fafd;">
+            <div style="font-size:8px; letter-spacing:.1em; text-transform:uppercase; color:#6b7a95; font-weight:700;">Total a pagar</div>
+            <div style="font-size:14px; font-weight:800;">S/ ${nf.format(t.pagado)}</div>
+          </td>
+        </tr>
+      </table>
+
+      <table style="width:100%; border-collapse:collapse; margin-top:2px;">
+        <thead style="display:table-header-group;">
+          <tr style="background:#f4f7fb;">
+            <th style="padding:7px 8px; font-size:8px; letter-spacing:.08em; text-transform:uppercase; color:#6b7a95; text-align:left; border-bottom:1.5px solid #e2eaf4;">N°</th>
+            <th style="padding:7px 8px; font-size:8px; letter-spacing:.08em; text-transform:uppercase; color:#6b7a95; text-align:right; border-bottom:1.5px solid #e2eaf4;">Saldo inicial</th>
+            <th style="padding:7px 8px; font-size:8px; letter-spacing:.08em; text-transform:uppercase; color:#6b7a95; text-align:right; border-bottom:1.5px solid #e2eaf4;">Cuota</th>
+            <th style="padding:7px 8px; font-size:8px; letter-spacing:.08em; text-transform:uppercase; color:#6b7a95; text-align:right; border-bottom:1.5px solid #e2eaf4;">Interés</th>
+            <th style="padding:7px 8px; font-size:8px; letter-spacing:.08em; text-transform:uppercase; color:#6b7a95; text-align:right; border-bottom:1.5px solid #e2eaf4;">Amortización</th>
+            <th style="padding:7px 8px; font-size:8px; letter-spacing:.08em; text-transform:uppercase; color:#6b7a95; text-align:right; border-bottom:1.5px solid #e2eaf4;">Saldo final</th>
+          </tr>
+        </thead>
+        <tbody>${filas}</tbody>
+      </table>
+
+      <div style="padding:10px 20px; background:#f4f7fb; border-top:1px solid #e2eaf4; color:#6b7a95; font-size:9px; text-align:center; line-height:1.5;">
+        Cronograma referencial calculado por el método francés. Sujeto a evaluación crediticia, políticas internas y condiciones comerciales vigentes.
+      </div>
+    </div>
+  `;
+
+  const wrapper = document.createElement("div");
+  wrapper.innerHTML = html;
+  wrapper.style.position = "absolute";
+  wrapper.style.left = "-9999px";
+  document.body.appendChild(wrapper);
+
+  html2pdf().set({
+    margin: [0.35, 0.3, 0.45, 0.3],
+    filename: "Cronograma-" + nombreArchivo() + ".pdf",
+    image: { type: "jpeg", quality: 0.98 },
+    html2canvas: { scale: 2, useCORS: true, backgroundColor: "#ffffff", logging: false, allowTaint: true },
+    jsPDF: { unit: "in", format: "a4", orientation: "portrait" },
+    pagebreak: { mode: ["css", "legacy"], avoid: "tr" }
   }).from(wrapper.firstElementChild).save().then(() => {
     document.body.removeChild(wrapper);
   });
