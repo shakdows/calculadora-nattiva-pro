@@ -1,4 +1,4 @@
-const VERSION = "v9";
+const VERSION = "v11";
 const CACHE_NAME = `nattiva-cache-${VERSION}`;
 
 const CORE = [
@@ -7,15 +7,28 @@ const CORE = [
   "./styles.css",
   "./script.js",
   "./manifest.webmanifest",
+  "./vendor/jspdf.umd.min.js",
   "./icon-192.png",
   "./icon-512.png",
   "./assets/logo-nattiva.png"
 ];
 
+/* Se cachea recurso a recurso: con cache.addAll(), un solo 404 aborta el
+   install entero y el service worker nunca llega a instalarse. */
+async function precache() {
+  const cache = await caches.open(CACHE_NAME);
+  await Promise.all(CORE.map(async (url) => {
+    try {
+      const res = await fetch(url, { cache: "reload" });
+      if (res.ok) await cache.put(url, res);
+    } catch (e) {
+      /* un recurso que falle no debe tumbar la instalación */
+    }
+  }));
+}
+
 self.addEventListener("install", (event) => {
-  event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => cache.addAll(CORE))
-  );
+  event.waitUntil(precache());
   self.skipWaiting();
 });
 
