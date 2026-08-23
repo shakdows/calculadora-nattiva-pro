@@ -151,114 +151,283 @@ async function compartirGeneral() {
   }
 }
 
-/* ── PDF ── */
-function descargarPDF() {
-  if (typeof html2pdf === "undefined") { alert("Librería PDF no cargada."); return; }
+/* ══════════════════════════════════════════════
+   MOTOR PDF — jsPDF vectorial
+   Texto real y seleccionable, medidas exactas en
+   puntos A4, paginación controlada y numeración.
+   ══════════════════════════════════════════════ */
 
-  const name = outCliente.textContent
-    ? outCliente.textContent.replace(/[^\w\s-]/g, "").replace(/\s+/g, "-")
-    : "Cliente";
+const PDF_W     = 595.28;                    // A4 ancho (pt)
+const PDF_H     = 841.89;                    // A4 alto  (pt)
+const PDF_M     = 40;                        // margen lateral
+const PDF_CW    = PDF_W - PDF_M * 2;         // ancho útil
+const PDF_FOOT  = 46;                        // alto de la banda de pie
+const PDF_LIMIT = PDF_H - PDF_FOOT - 10;     // y máximo para contenido
 
-  // Crear contenido HTML autónomo para el PDF con estilos inline
-  const logoSrc = document.querySelector(".result-main-logo").src;
+const C = {
+  navy:   [ 13,  31,  60],
+  navy2:  [ 21,  42,  82],
+  navyLn: [ 52,  71, 110],
+  white:  [255, 255, 255],
+  ghost:  [151, 164, 187],
+  muted:  [107, 122, 149],
+  line:   [226, 234, 244],
+  soft:   [248, 250, 253],
+  cream:  [250, 247, 242],
+  gold:   [253, 246, 227],
+  goldLn: [232, 184,  75],
+  red:    [179,  32,  42],
+  redBg:  [253, 232, 234],
+  green:  [ 18, 140,  58],
+  foot:   [244, 247, 251],
+  sep:    [205, 216, 232]
+};
 
-  const html = `
-    <div style="font-family:'Inter',Arial,sans-serif; color:#0d1f3c; width:100%; max-width:700px; margin:0 auto;">
+const NOTA_PROPUESTA =
+  "Esta simulación es informativa y está sujeta a evaluación crediticia, políticas internas y condiciones comerciales vigentes.";
+const PIE_PROPUESTA =
+  "Calculadora de Créditos Nattiva · Documento generado automáticamente, sin valor contractual.";
+const NOTA_CRONOGRAMA =
+  "Cronograma referencial calculado por el método francés (cuota constante). Sujeto a evaluación crediticia, políticas internas y condiciones comerciales vigentes.";
 
-      <!-- COVER -->
-      <div style="background:#0d1f3c; padding:28px 30px; display:flex; align-items:center; justify-content:space-between; gap:16px; margin-bottom:0;">
-        <div style="display:flex; align-items:center; gap:14px; flex:1;">
-          <img src="${logoSrc}" style="width:90px; height:auto; border-radius:8px;" />
-          <div>
-            <div style="font-size:10px; font-weight:700; letter-spacing:.2em; text-transform:uppercase; color:rgba(255,255,255,.55); margin-bottom:5px;">RESUMEN FINANCIERO</div>
-            <div style="font-family:Georgia,serif; font-size:26px; font-weight:800; color:#fff; line-height:1.1;">Propuesta de crédito</div>
-            <div style="font-size:11px; color:rgba(255,255,255,.5); margin-top:5px;">Simulación generada para evaluación preliminar</div>
-          </div>
-        </div>
-        <div style="background:rgba(255,255,255,.12); border:1px solid rgba(255,255,255,.2); border-radius:14px; padding:16px 20px; text-align:center; min-width:170px;">
-          <div style="font-size:10px; font-weight:700; letter-spacing:.16em; text-transform:uppercase; color:rgba(255,255,255,.6); margin-bottom:6px;">CUOTA MENSUAL ESTIMADA</div>
-          <div style="font-size:30px; font-weight:800; color:#fff; letter-spacing:-.01em;">${cuotaMensual.textContent}</div>
-        </div>
-      </div>
-
-      <!-- CLIENT -->
-      <div style="background:#faf7f2; padding:14px 28px; display:flex; align-items:center; justify-content:space-between; border-bottom:1px solid #e2eaf4;">
-        <div>
-          <div style="font-size:10px; font-weight:700; letter-spacing:.18em; text-transform:uppercase; color:#6b7a95; margin-bottom:4px;">CLIENTE</div>
-          <div style="font-family:Georgia,serif; font-size:22px; font-weight:700; color:#0d1f3c;">${outCliente.textContent}</div>
-        </div>
-        <div style="padding:6px 13px; border-radius:999px; background:#fde8ea; border:1px solid rgba(179,32,42,.2); color:#b3202a; font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.09em;">Simulación referencial</div>
-      </div>
-
-      <!-- INSIGHTS -->
-      <div style="display:flex; border-bottom:1px solid #e2eaf4;">
-        <div style="flex:1; padding:18px 24px; background:#fdf6e3; border-right:1px solid rgba(232,184,75,.3);">
-          <div style="font-size:11px; color:#6b7a95; margin-bottom:7px; font-weight:500;">Ingreso mensual referencial</div>
-          <div style="font-size:24px; font-weight:800; color:#0d1f3c; letter-spacing:-.02em;">${outIngreso.textContent}</div>
-        </div>
-        <div style="flex:1; padding:18px 24px; background:#f8fafd;">
-          <div style="font-size:11px; color:#6b7a95; margin-bottom:7px; font-weight:500;">Monto a financiar</div>
-          <div style="font-size:24px; font-weight:800; color:#0d1f3c; letter-spacing:-.02em;">${outMonto.textContent}</div>
-        </div>
-      </div>
-
-      <!-- DETAIL -->
-      <div style="padding:18px 28px 14px; background:#fff;">
-        <div style="margin-bottom:12px; display:flex; align-items:baseline; gap:10px;">
-          <span style="font-family:Georgia,serif; font-size:16px; font-weight:700; color:#0d1f3c;">Detalle de la operación</span>
-          <span style="font-size:11px; color:#6b7a95;">Variables consideradas en la simulación</span>
-        </div>
-        <table style="width:100%; border-collapse:collapse; border:1px solid #e2eaf4; border-radius:12px; overflow:hidden;">
-          <tr style="background:#fff;">
-            <td style="padding:13px 18px; font-size:13px; color:#6b7a95; border-bottom:1px solid #e2eaf4;">Precio del inmueble</td>
-            <td style="padding:13px 18px; font-size:18px; font-weight:800; color:#0d1f3c; text-align:right; border-bottom:1px solid #e2eaf4; letter-spacing:-.01em;">${outPrecio.textContent}</td>
-          </tr>
-          <tr style="background:#f8fafd;">
-            <td style="padding:13px 18px; font-size:13px; color:#6b7a95; border-bottom:1px solid #e2eaf4;">Cuota inicial (${outCuotaPct.textContent}%)</td>
-            <td style="padding:13px 18px; font-size:18px; font-weight:800; color:#0d1f3c; text-align:right; border-bottom:1px solid #e2eaf4; letter-spacing:-.01em;">${outCuota.textContent}</td>
-          </tr>
-          <tr style="background:#fff;">
-            <td style="padding:13px 18px; font-size:13px; color:#6b7a95; border-bottom:1px solid #e2eaf4;">Plazo</td>
-            <td style="padding:13px 18px; font-size:18px; font-weight:800; color:#0d1f3c; text-align:right; border-bottom:1px solid #e2eaf4; letter-spacing:-.01em;">${outPlazo.textContent}</td>
-          </tr>
-          <tr style="background:#f8fafd;">
-            <td style="padding:13px 18px; font-size:13px; color:#6b7a95;">TCEA</td>
-            <td style="padding:13px 18px; font-size:18px; font-weight:800; color:#0d1f3c; text-align:right; letter-spacing:-.01em;">${outTea.textContent}</td>
-          </tr>
-        </table>
-      </div>
-
-      <!-- FOOTER -->
-      <div style="padding:12px 28px; background:#f4f7fb; border-top:1px solid #e2eaf4; color:#6b7a95; font-size:11px; text-align:center; line-height:1.5;">
-        Esta simulación es informativa y está sujeta a evaluación crediticia, políticas internas y condiciones comerciales vigentes.
-      </div>
-
-    </div>
-  `;
-
-  const wrapper = document.createElement("div");
-  wrapper.innerHTML = html;
-  document.body.appendChild(wrapper);
-  wrapper.style.position = "absolute";
-  wrapper.style.left = "-9999px";
-
-  html2pdf().set({
-    margin: 0.4,
-    filename: "Nattiva-Credito-" + name + ".pdf",
-    image: { type: "jpeg", quality: 1 },
-    html2canvas: {
-      scale: 3,
-      useCORS: true,
-      backgroundColor: "#ffffff",
-      logging: false,
-      allowTaint: true
-    },
-    jsPDF: { unit: "in", format: "a4", orientation: "portrait" },
-    pagebreak: { mode: ["avoid-all"] }
-  }).from(wrapper.firstElementChild).save().then(() => {
-    document.body.removeChild(wrapper);
-  });
+/* ── Acceso a la librería (UMD o global clásico) ── */
+function jsPDFCtor() {
+  if (window.jspdf && typeof window.jspdf.jsPDF === "function") return window.jspdf.jsPDF;
+  if (typeof window.jsPDF === "function") return window.jsPDF;
+  return null;
 }
+
+function nuevoPDF() {
+  const Ctor = jsPDFCtor();
+  if (!Ctor) return null;
+  return new Ctor({ unit: "pt", format: "a4", orientation: "portrait", compress: true });
+}
+
+/* ── Utilidades de dibujo ── */
+function fill(doc, c)   { doc.setFillColor(c[0], c[1], c[2]); }
+function stroke(doc, c) { doc.setDrawColor(c[0], c[1], c[2]); }
+function ink(doc, c)    { doc.setTextColor(c[0], c[1], c[2]); }
+
+function txt(doc, s, x, y, o) {
+  o = o || {};
+  doc.setFont(o.font || "helvetica", o.style || "normal");
+  doc.setFontSize(o.size || 10);
+  ink(doc, o.color || C.navy);
+  const op = {};
+  if (o.align) op.align = o.align;
+  if (o.cs)    op.charSpace = o.cs;
+  doc.text(String(s), x, y, op);
+}
+
+function anchoTexto(doc, s, size, style, cs) {
+  doc.setFont("helvetica", style || "normal");
+  doc.setFontSize(size);
+  let w = doc.getTextWidth(String(s));
+  if (cs) w += cs * Math.max(String(s).length - 1, 0);
+  return w;
+}
+
+/* Reduce el cuerpo hasta que el texto entre en maxW (evita desbordes) */
+function ajustar(doc, s, maxW, size, style) {
+  let sz = size;
+  while (sz > 6 && anchoTexto(doc, s, sz, style) > maxW) sz -= 0.5;
+  return sz;
+}
+
+function hairline(doc, x1, y, x2, c, w) {
+  stroke(doc, c || C.line);
+  doc.setLineWidth(w || 0.6);
+  doc.line(x1, y, x2, y);
+}
+
+/* El logo se rasteriza una sola vez a data-URL: así jsPDF no necesita
+   volver a pedir el archivo y un fallo de imagen nunca rompe el PDF. */
+let _logoCache;
+function logoPDF() {
+  if (_logoCache !== undefined) return _logoCache;
+  const img = document.querySelector(".result-main-logo");
+  if (!img || !img.complete || !img.naturalWidth) return (_logoCache = null);
+  try {
+    const cv = document.createElement("canvas");
+    cv.width  = img.naturalWidth;
+    cv.height = img.naturalHeight;
+    cv.getContext("2d").drawImage(img, 0, 0);
+    _logoCache = { data: cv.toDataURL("image/png"), ratio: img.naturalWidth / img.naturalHeight };
+  } catch (e) {
+    _logoCache = null;
+  }
+  return _logoCache;
+}
+
+/* Dibuja el logo y devuelve el ancho ocupado (0 si no se pudo). */
+function dibujarLogo(doc, x, y, h) {
+  const l = logoPDF();
+  if (!l) return 0;
+  const w = h * l.ratio;
+  try { doc.addImage(l.data, "PNG", x, y, w, h); return w; }
+  catch (e) { return 0; }
+}
+
+function fechaPDF() {
+  try {
+    return new Date().toLocaleDateString("es-PE", { day: "2-digit", month: "long", year: "numeric" });
+  } catch (e) {
+    return new Date().toLocaleDateString();
+  }
+}
+
+/* ── Pie con nota legal + numeración (se aplica al final) ── */
+function pieDePagina(doc, nota) {
+  const total = doc.getNumberOfPages();
+  for (let i = 1; i <= total; i++) {
+    doc.setPage(i);
+
+    fill(doc, C.foot);
+    doc.rect(0, PDF_H - PDF_FOOT, PDF_W, PDF_FOOT, "F");
+    hairline(doc, 0, PDF_H - PDF_FOOT, PDF_W, C.line, 0.6);
+
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(7.2);
+    const lineas = doc.splitTextToSize(nota, PDF_CW - 30).slice(0, 2);
+    lineas.forEach((l, k) => {
+      txt(doc, l, PDF_W / 2, PDF_H - 34 + k * 9, { size: 7.2, color: C.muted, align: "center" });
+    });
+
+    txt(doc, "Generado el " + fechaPDF(), PDF_M, PDF_H - 12, { size: 7, color: C.muted });
+    txt(doc, "Página " + i + " de " + total, PDF_W - PDF_M, PDF_H - 12,
+        { size: 7, color: C.muted, align: "right" });
+  }
+}
+
+function avisoSinLibreria() {
+  alert("No se pudo cargar la librería de PDF.\nRevisa tu conexión a internet y vuelve a intentarlo.");
+}
+
+/* ══════════════════════════════════════════════
+   PDF 1 — PROPUESTA DE CRÉDITO (una página)
+   ══════════════════════════════════════════════ */
+function descargarPDF() {
+  if (!simActual) { alert("Primero realiza un cálculo."); return; }
+
+  const doc = nuevoPDF();
+  if (!doc) { avisoSinLibreria(); return; }
+
+  const s = simActual;
+
+  doc.setProperties({
+    title:   "Propuesta de crédito Nattiva - " + s.nombre,
+    subject: "Simulación de crédito inmobiliario",
+    author:  "Nattiva",
+    creator: "Calculadora de Créditos Nattiva"
+  });
+
+  /* ── Portada ── */
+  const HB = 156;
+  fill(doc, C.navy); doc.rect(0, 0, PDF_W, HB, "F");
+  fill(doc, C.red);  doc.rect(0, 0, PDF_W, 5, "F");
+
+  const lwA = dibujarLogo(doc, PDF_M, 58, 40);
+  const tx  = PDF_M + (lwA ? lwA + 18 : 0);
+  txt(doc, "RESUMEN FINANCIERO", tx, 60, { size: 7.4, style: "bold", color: C.ghost, cs: 1.7 });
+  txt(doc, "Propuesta de crédito", tx, 88, { font: "times", style: "bold", size: 24, color: C.white });
+  txt(doc, "Simulación generada para evaluación preliminar", tx, 105, { size: 8.6, color: C.ghost });
+
+  // Métrica principal
+  const boxW = 186, boxX = PDF_W - PDF_M - boxW, boxY = 42, boxH = 76;
+  fill(doc, C.navy2); stroke(doc, C.navyLn); doc.setLineWidth(0.8);
+  doc.roundedRect(boxX, boxY, boxW, boxH, 10, 10, "FD");
+  txt(doc, "CUOTA MENSUAL", boxX + boxW / 2, boxY + 21,
+      { size: 6.9, style: "bold", color: C.ghost, align: "center" });
+  const cuotaStr = "S/ " + nf.format(s.cuotaMensual);
+  txt(doc, cuotaStr, boxX + boxW / 2, boxY + 57,
+      { size: ajustar(doc, cuotaStr, boxW - 24, 21, "bold"), style: "bold", color: C.white, align: "center" });
+
+  /* ── Cliente ── */
+  fill(doc, C.cream); doc.rect(0, HB, PDF_W, 62, "F");
+  hairline(doc, 0, HB + 62, PDF_W, C.line, 0.8);
+  txt(doc, "CLIENTE", PDF_M, HB + 24, { size: 7.2, style: "bold", color: C.muted, cs: 1.6 });
+  txt(doc, s.nombre, PDF_M, HB + 46, { font: "times", style: "bold", size: 18, color: C.navy });
+
+  const pillTxt = "SIMULACIÓN REFERENCIAL";
+  const pillW   = anchoTexto(doc, pillTxt, 7.2, "bold", 0.9) + 24;
+  const pillX   = PDF_W - PDF_M - pillW, pillY = HB + 22;
+  fill(doc, C.redBg); stroke(doc, C.red); doc.setLineWidth(0.6);
+  doc.roundedRect(pillX, pillY, pillW, 19, 9.5, 9.5, "FD");
+  txt(doc, pillTxt, pillX + 12, pillY + 12.8, { size: 7.2, style: "bold", color: C.red, cs: 0.9 });
+
+  /* ── Tarjetas destacadas ── */
+  const cY = 246, cH = 78, cW = (PDF_CW - 16) / 2;
+  const tarjeta = (x, bg, borde, acento, label, valor) => {
+    fill(doc, bg); stroke(doc, borde); doc.setLineWidth(0.8);
+    doc.roundedRect(x, cY, cW, cH, 10, 10, "FD");
+    fill(doc, acento); doc.rect(x + 1, cY + 12, 3, cH - 24, "F");
+    txt(doc, label, x + 20, cY + 30, { size: 8.4, color: C.muted });
+    txt(doc, valor, x + 20, cY + 58,
+        { size: ajustar(doc, valor, cW - 40, 17, "bold"), style: "bold", color: C.navy });
+  };
+  tarjeta(PDF_M, C.gold, C.goldLn, C.goldLn,
+          "Ingreso mensual referencial", "S/ " + nf.format(s.cuotaMensual / 0.3));
+  tarjeta(PDF_M + cW + 16, C.soft, C.line, C.navy,
+          "Monto a financiar", "S/ " + nf.format(s.montoFinanciado));
+
+  /* ── Detalle de la operación ── */
+  txt(doc, "Detalle de la operación", PDF_M, 358, { font: "times", style: "bold", size: 14, color: C.navy });
+  txt(doc, "Variables consideradas en la simulación", PDF_M, 374, { size: 8.4, color: C.muted });
+  hairline(doc, PDF_M, 384, PDF_M + PDF_CW, C.line, 0.8);
+
+  const filas = [
+    ["Precio del inmueble", "S/ " + nf.format(s.precio)],
+    ["Cuota inicial (" + s.cuotaInicialPct + "%)", "S/ " + nf.format(s.cuotaInicial)],
+    ["Plazo", s.anios + " años (" + s.meses + " cuotas)"],
+    ["TCEA", s.tcea + " %"]
+  ];
+  const tY = 400, rH = 38;
+  fill(doc, C.white); stroke(doc, C.line); doc.setLineWidth(0.8);
+  doc.roundedRect(PDF_M, tY, PDF_CW, rH * filas.length, 10, 10, "FD");
+  filas.forEach((f, i) => {
+    const y = tY + rH * i;
+    if (i % 2 === 1) { fill(doc, C.soft); doc.rect(PDF_M + 1, y, PDF_CW - 2, rH, "F"); }
+    if (i > 0) hairline(doc, PDF_M + 1, y, PDF_M + PDF_CW - 1, C.line, 0.5);
+    txt(doc, f[0], PDF_M + 20, y + rH / 2 + 3.5, { size: 9.4, color: C.muted });
+    txt(doc, f[1], PDF_M + PDF_CW - 20, y + rH / 2 + 5,
+        { size: ajustar(doc, f[1], PDF_CW / 2, 14, "bold"), style: "bold", color: C.navy, align: "right" });
+  });
+
+  /* ── Resumen del financiamiento ── */
+  const t   = totalesCronograma(s.tabla);
+  const sY  = tY + rH * filas.length + 34;
+  txt(doc, "Resumen del financiamiento", PDF_M, sY, { font: "times", style: "bold", size: 14, color: C.navy });
+  txt(doc, "Proyección total del crédito según el método francés", PDF_M, sY + 16, { size: 8.4, color: C.muted });
+  hairline(doc, PDF_M, sY + 26, PDF_M + PDF_CW, C.line, 0.8);
+
+  const gY = sY + 42, gH = 70, gW = (PDF_CW - 24) / 3;
+  [
+    ["Total de intereses", "S/ " + nf.format(t.interes)],
+    ["Total a pagar",      "S/ " + nf.format(t.pagado)],
+    ["Cuotas mensuales",   String(s.meses)]
+  ].forEach((g, i) => {
+    const x = PDF_M + (gW + 12) * i;
+    fill(doc, C.white); stroke(doc, C.line); doc.setLineWidth(0.8);
+    doc.roundedRect(x, gY, gW, gH, 10, 10, "FD");
+    txt(doc, g[0], x + 18, gY + 27, { size: 8.2, color: C.muted });
+    txt(doc, g[1], x + 18, gY + 52,
+        { size: ajustar(doc, g[1], gW - 36, 15, "bold"), style: "bold", color: C.navy });
+  });
+
+  /* ── Nota ── */
+  const nY = gY + gH + 26;
+  doc.setFont("helvetica", "normal"); doc.setFontSize(8.2);
+  const nota = doc.splitTextToSize(NOTA_PROPUESTA, PDF_CW - 44);
+  const nH   = 22 + nota.length * 11;
+  fill(doc, C.soft); stroke(doc, C.line); doc.setLineWidth(0.8);
+  doc.roundedRect(PDF_M, nY, PDF_CW, nH, 8, 8, "FD");
+  fill(doc, C.red); doc.rect(PDF_M + 1, nY + 8, 3, nH - 16, "F");
+  nota.forEach((l, i) => txt(doc, l, PDF_M + 22, nY + 20 + i * 11, { size: 8.2, color: C.muted }));
+
+  pieDePagina(doc, PIE_PROPUESTA);
+  doc.save("Nattiva-Credito-" + nombreArchivo() + ".pdf");
+}
+
 
 /* ══════════════════════════════════════════════
    CRONOGRAMA DE AMORTIZACIÓN — MÉTODO FRANCÉS
@@ -452,101 +621,153 @@ function descargarCronogramaCSV() {
 }
 
 function nombreArchivo() {
-  return simActual && simActual.nombre
-    ? simActual.nombre.replace(/[^\w\s-]/g, "").replace(/\s+/g, "-")
-    : "Cliente";
+  const n = (simActual && simActual.nombre) ? simActual.nombre : "Cliente";
+  return n.normalize("NFD")                 // separa las tildes
+          .replace(/[\u0300-\u036f]/g, "")  // y las quita (María -> Maria)
+          .replace(/[^\w\s-]/g, "")
+          .trim()
+          .replace(/\s+/g, "-") || "Cliente";
 }
 
-/* ── Exportar cronograma a PDF ── */
+/* ══════════════════════════════════════════════
+   PDF 2 — CRONOGRAMA DE AMORTIZACIÓN
+   Cabecera de tabla repetida en cada página,
+   filas nunca partidas y numeración de páginas.
+   ══════════════════════════════════════════════ */
+
+const CRONO_COLS = [
+  { t: "N°",           w:  40, a: "left"  },
+  { t: "Saldo inicial", w:  96, a: "right" },
+  { t: "Cuota",        w:  88, a: "right" },
+  { t: "Interés",      w:  88, a: "right" },
+  { t: "Amortización", w:  98, a: "right" },
+  { t: "Saldo final",  w: 105.28, a: "right" }
+];
+(function posicionarColumnas() {
+  let x = PDF_M;
+  CRONO_COLS.forEach(c => { c.x = x; x += c.w; });
+})();
+
+const CRONO_RH = 15.5;   // alto de fila
+const CRONO_HH = 22;     // alto de cabecera de tabla
+
+function celda(doc, col, y, valor, o) {
+  const der = col.a === "right";
+  txt(doc, valor, der ? col.x + col.w - 8 : col.x + 8, y, Object.assign({ align: col.a }, o));
+}
+
+function cabeceraTablaCrono(doc, y) {
+  fill(doc, C.foot);
+  doc.rect(PDF_M, y, PDF_CW, CRONO_HH, "F");
+  hairline(doc, PDF_M, y, PDF_M + PDF_CW, C.line, 0.6);
+  hairline(doc, PDF_M, y + CRONO_HH, PDF_M + PDF_CW, C.navy, 1);
+  CRONO_COLS.forEach(c =>
+    celda(doc, c, y + 14.5, c.t, { size: 6.9, style: "bold", color: C.muted })
+  );
+  return y + CRONO_HH;
+}
+
+function cabeceraPaginaCrono(doc, s) {
+  fill(doc, C.red); doc.rect(0, 0, PDF_W, 4, "F");
+  txt(doc, "Cronograma de amortización", PDF_M, 42,
+      { font: "times", style: "bold", size: 13, color: C.navy });
+  txt(doc, s.nombre + " · " + s.meses + " cuotas · TCEA " + s.tcea + "%", PDF_W - PDF_M, 42,
+      { size: 8, color: C.muted, align: "right" });
+  hairline(doc, PDF_M, 52, PDF_M + PDF_CW, C.line, 0.6);
+  return 68;
+}
+
 function descargarCronogramaPDF() {
-  if (!simActual) return;
-  if (typeof html2pdf === "undefined") { alert("Librería PDF no cargada."); return; }
+  if (!simActual) { alert("Primero realiza un cálculo."); return; }
+
+  const doc = nuevoPDF();
+  if (!doc) { avisoSinLibreria(); return; }
 
   const s = simActual;
   const t = totalesCronograma(s.tabla);
-  const logo = document.querySelector(".result-main-logo");
-  const logoSrc = logo ? logo.src : "";
 
-  const filas = s.tabla.map(f => `
-    <tr style="page-break-inside:avoid;">
-      <td style="padding:5px 8px; font-size:9px; border-bottom:1px solid #e2eaf4; font-weight:700; color:#0d1f3c;">${f.n}</td>
-      <td style="padding:5px 8px; font-size:9px; border-bottom:1px solid #e2eaf4; text-align:right; color:#6b7a95;">${nf.format(f.saldoInicial)}</td>
-      <td style="padding:5px 8px; font-size:9px; border-bottom:1px solid #e2eaf4; text-align:right; font-weight:700; color:#0d1f3c;">${nf.format(f.cuota)}</td>
-      <td style="padding:5px 8px; font-size:9px; border-bottom:1px solid #e2eaf4; text-align:right; color:#b3202a;">${nf.format(f.interes)}</td>
-      <td style="padding:5px 8px; font-size:9px; border-bottom:1px solid #e2eaf4; text-align:right; color:#128c3a;">${nf.format(f.amortizacion)}</td>
-      <td style="padding:5px 8px; font-size:9px; border-bottom:1px solid #e2eaf4; text-align:right; font-weight:700; color:#0d1f3c;">${nf.format(f.saldoFinal)}</td>
-    </tr>`).join("");
-
-  const html = `
-    <div style="font-family:'Inter',Arial,sans-serif; color:#0d1f3c; width:100%; max-width:720px; margin:0 auto;">
-
-      <div style="background:#0d1f3c; padding:20px 24px; display:flex; align-items:center; gap:14px;">
-        ${logoSrc ? `<img src="${logoSrc}" style="width:78px; height:auto; border-radius:8px;" />` : ""}
-        <div>
-          <div style="font-size:9px; font-weight:700; letter-spacing:.2em; text-transform:uppercase; color:rgba(255,255,255,.55); margin-bottom:4px;">MÉTODO FRANCÉS · CUOTA CONSTANTE</div>
-          <div style="font-family:Georgia,serif; font-size:22px; font-weight:800; color:#fff;">Cronograma de amortización</div>
-          <div style="font-size:10px; color:rgba(255,255,255,.6); margin-top:4px;">${s.nombre} · ${s.anios} años (${s.meses} cuotas) · TCEA ${s.tcea}%</div>
-        </div>
-      </div>
-
-      <table style="width:100%; border-collapse:collapse; border-bottom:1px solid #e2eaf4;">
-        <tr>
-          <td style="padding:10px 14px; background:#f8fafd; border-right:1px solid #e2eaf4;">
-            <div style="font-size:8px; letter-spacing:.1em; text-transform:uppercase; color:#6b7a95; font-weight:700;">Monto financiado</div>
-            <div style="font-size:14px; font-weight:800;">S/ ${nf.format(s.montoFinanciado)}</div>
-          </td>
-          <td style="padding:10px 14px; background:#fdf6e3; border-right:1px solid #e2eaf4;">
-            <div style="font-size:8px; letter-spacing:.1em; text-transform:uppercase; color:#6b7a95; font-weight:700;">Cuota mensual</div>
-            <div style="font-size:14px; font-weight:800;">S/ ${nf.format(s.cuotaMensual)}</div>
-          </td>
-          <td style="padding:10px 14px; background:#f8fafd; border-right:1px solid #e2eaf4;">
-            <div style="font-size:8px; letter-spacing:.1em; text-transform:uppercase; color:#6b7a95; font-weight:700;">Total intereses</div>
-            <div style="font-size:14px; font-weight:800;">S/ ${nf.format(t.interes)}</div>
-          </td>
-          <td style="padding:10px 14px; background:#f8fafd;">
-            <div style="font-size:8px; letter-spacing:.1em; text-transform:uppercase; color:#6b7a95; font-weight:700;">Total a pagar</div>
-            <div style="font-size:14px; font-weight:800;">S/ ${nf.format(t.pagado)}</div>
-          </td>
-        </tr>
-      </table>
-
-      <table style="width:100%; border-collapse:collapse; margin-top:2px;">
-        <thead style="display:table-header-group;">
-          <tr style="background:#f4f7fb;">
-            <th style="padding:7px 8px; font-size:8px; letter-spacing:.08em; text-transform:uppercase; color:#6b7a95; text-align:left; border-bottom:1.5px solid #e2eaf4;">N°</th>
-            <th style="padding:7px 8px; font-size:8px; letter-spacing:.08em; text-transform:uppercase; color:#6b7a95; text-align:right; border-bottom:1.5px solid #e2eaf4;">Saldo inicial</th>
-            <th style="padding:7px 8px; font-size:8px; letter-spacing:.08em; text-transform:uppercase; color:#6b7a95; text-align:right; border-bottom:1.5px solid #e2eaf4;">Cuota</th>
-            <th style="padding:7px 8px; font-size:8px; letter-spacing:.08em; text-transform:uppercase; color:#6b7a95; text-align:right; border-bottom:1.5px solid #e2eaf4;">Interés</th>
-            <th style="padding:7px 8px; font-size:8px; letter-spacing:.08em; text-transform:uppercase; color:#6b7a95; text-align:right; border-bottom:1.5px solid #e2eaf4;">Amortización</th>
-            <th style="padding:7px 8px; font-size:8px; letter-spacing:.08em; text-transform:uppercase; color:#6b7a95; text-align:right; border-bottom:1.5px solid #e2eaf4;">Saldo final</th>
-          </tr>
-        </thead>
-        <tbody>${filas}</tbody>
-      </table>
-
-      <div style="padding:10px 20px; background:#f4f7fb; border-top:1px solid #e2eaf4; color:#6b7a95; font-size:9px; text-align:center; line-height:1.5;">
-        Cronograma referencial calculado por el método francés. Sujeto a evaluación crediticia, políticas internas y condiciones comerciales vigentes.
-      </div>
-    </div>
-  `;
-
-  const wrapper = document.createElement("div");
-  wrapper.innerHTML = html;
-  wrapper.style.position = "absolute";
-  wrapper.style.left = "-9999px";
-  document.body.appendChild(wrapper);
-
-  html2pdf().set({
-    margin: [0.35, 0.3, 0.45, 0.3],
-    filename: "Cronograma-" + nombreArchivo() + ".pdf",
-    image: { type: "jpeg", quality: 0.98 },
-    html2canvas: { scale: 2, useCORS: true, backgroundColor: "#ffffff", logging: false, allowTaint: true },
-    jsPDF: { unit: "in", format: "a4", orientation: "portrait" },
-    pagebreak: { mode: ["css", "legacy"], avoid: "tr" }
-  }).from(wrapper.firstElementChild).save().then(() => {
-    document.body.removeChild(wrapper);
+  doc.setProperties({
+    title:   "Cronograma de amortización - " + s.nombre,
+    subject: "Método francés · cuota constante",
+    author:  "Nattiva",
+    creator: "Calculadora de Créditos Nattiva"
   });
+
+  /* ── Cabecera de portada ── */
+  const HB = 110;
+  fill(doc, C.navy); doc.rect(0, 0, PDF_W, HB, "F");
+  fill(doc, C.red);  doc.rect(0, 0, PDF_W, 5, "F");
+
+  const lwB = dibujarLogo(doc, PDF_M, 38, 34);
+  const tx  = PDF_M + (lwB ? lwB + 16 : 0);
+  txt(doc, "MÉTODO FRANCÉS · CUOTA CONSTANTE", tx, 44,
+      { size: 6.9, style: "bold", color: C.ghost, cs: 1.5 });
+  txt(doc, "Cronograma de amortización", tx, 70,
+      { font: "times", style: "bold", size: 20, color: C.white });
+  txt(doc, s.nombre + " · " + s.anios + " años (" + s.meses + " cuotas) · TCEA " + s.tcea + "%", tx, 86,
+      { size: 8.2, color: C.ghost });
+
+  /* ── Resumen ── */
+  const rY = 128, rH = 56, gap = 10, rW = (PDF_CW - gap * 3) / 4;
+  const resumen = [
+    ["MONTO FINANCIADO", "S/ " + nf.format(s.montoFinanciado), false],
+    ["CUOTA MENSUAL",    "S/ " + nf.format(s.cuotaMensual),    true ],
+    ["TOTAL INTERESES",  "S/ " + nf.format(t.interes),         false],
+    ["TOTAL A PAGAR",    "S/ " + nf.format(t.pagado),          false]
+  ];
+  resumen.forEach((r, i) => {
+    const x = PDF_M + (rW + gap) * i;
+    fill(doc, r[2] ? C.gold : C.soft);
+    stroke(doc, r[2] ? C.goldLn : C.line);
+    doc.setLineWidth(0.8);
+    doc.roundedRect(x, rY, rW, rH, 8, 8, "FD");
+    txt(doc, r[0], x + 12, rY + 21, { size: 6.4, style: "bold", color: C.muted, cs: 0.8 });
+    txt(doc, r[1], x + 12, rY + 42,
+        { size: ajustar(doc, r[1], rW - 24, 12.5, "bold"), style: "bold", color: C.navy });
+  });
+
+  /* ── Tabla ── */
+  let y = cabeceraTablaCrono(doc, rY + rH + 24);
+
+  s.tabla.forEach((f, i) => {
+    if (y + CRONO_RH > PDF_LIMIT) {
+      doc.addPage();
+      y = cabeceraTablaCrono(doc, cabeceraPaginaCrono(doc, s));
+    }
+    if (i % 2 === 1) { fill(doc, C.soft); doc.rect(PDF_M, y, PDF_CW, CRONO_RH, "F"); }
+
+    const b = y + 10.4;
+    celda(doc, CRONO_COLS[0], b, f.n,                       { size: 7.8, style: "bold", color: C.navy  });
+    celda(doc, CRONO_COLS[1], b, nf.format(f.saldoInicial), { size: 7.8, color: C.muted });
+    celda(doc, CRONO_COLS[2], b, nf.format(f.cuota),        { size: 7.8, style: "bold", color: C.navy  });
+    celda(doc, CRONO_COLS[3], b, nf.format(f.interes),      { size: 7.8, color: C.red   });
+    celda(doc, CRONO_COLS[4], b, nf.format(f.amortizacion), { size: 7.8, color: C.green });
+    celda(doc, CRONO_COLS[5], b, nf.format(f.saldoFinal),   { size: 7.8, style: "bold", color: C.navy  });
+    y += CRONO_RH;
+
+    // Separador cada 12 cuotas (fin de año)
+    if (f.n % 12 === 0 && f.n !== s.meses && y + CRONO_RH <= PDF_LIMIT) {
+      hairline(doc, PDF_M, y, PDF_M + PDF_CW, C.sep, 1);
+    }
+  });
+
+  /* ── Totales ── */
+  if (y + 24 > PDF_LIMIT) {
+    doc.addPage();
+    y = cabeceraTablaCrono(doc, cabeceraPaginaCrono(doc, s));
+  }
+  fill(doc, C.navy); doc.rect(PDF_M, y, PDF_CW, 24, "F");
+  const bt = y + 15.2, tot = { size: 7.6, style: "bold", color: C.white };
+  celda(doc, CRONO_COLS[0], bt, "TOTAL",                        tot);
+  celda(doc, CRONO_COLS[2], bt, nf.format(t.pagado),            tot);
+  celda(doc, CRONO_COLS[3], bt, nf.format(t.interes),           tot);
+  celda(doc, CRONO_COLS[4], bt, nf.format(s.montoFinanciado),   tot);
+  celda(doc, CRONO_COLS[5], bt, "0.00",                         tot);
+
+  pieDePagina(doc, NOTA_CRONOGRAMA);
+  doc.save("Cronograma-" + nombreArchivo() + ".pdf");
 }
+
 
 /* ── Init ── */
 window.addEventListener("load", () => {
