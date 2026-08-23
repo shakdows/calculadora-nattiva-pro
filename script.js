@@ -300,7 +300,7 @@ function pieDePagina(doc, nota) {
 }
 
 function avisoSinLibreria() {
-  alert("No se pudo cargar la librería de PDF.\nRevisa tu conexión a internet y vuelve a intentarlo.");
+  alert("No se pudo iniciar el generador de PDF.\nRecarga la página e inténtalo de nuevo.");
 }
 
 /* ══════════════════════════════════════════════
