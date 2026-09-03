@@ -764,4 +764,16 @@ if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => {
     navigator.serviceWorker.register("./sw.js").catch(() => {});
   });
+
+  /* Si ya había un service worker controlando la página y entra una versión
+     nueva, se recarga una sola vez para que el usuario deje de ver el código
+     guardado en caché. En la primera visita no se recarga: ahí no hay nada
+     viejo que reemplazar y una recarga solo interrumpiría al usuario. */
+  const yaHabiaSW = !!navigator.serviceWorker.controller;
+  let recargando = false;
+  navigator.serviceWorker.addEventListener("controllerchange", () => {
+    if (!yaHabiaSW || recargando) return;
+    recargando = true;
+    window.location.reload();
+  });
 }
