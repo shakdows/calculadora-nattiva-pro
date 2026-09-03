@@ -393,29 +393,8 @@ function descargarPDF() {
         { size: ajustar(doc, f[1], PDF_CW / 2, 14, "bold"), style: "bold", color: C.navy, align: "right" });
   });
 
-  /* ── Resumen del financiamiento ── */
-  const t   = totalesCronograma(s.tabla);
-  const sY  = tY + rH * filas.length + 34;
-  txt(doc, "Resumen del financiamiento", PDF_M, sY, { font: "times", style: "bold", size: 14, color: C.navy });
-  txt(doc, "Proyección total del crédito según el método francés", PDF_M, sY + 16, { size: 8.4, color: C.muted });
-  hairline(doc, PDF_M, sY + 26, PDF_M + PDF_CW, C.line, 0.8);
-
-  const gY = sY + 42, gH = 70, gW = (PDF_CW - 24) / 3;
-  [
-    ["Total de intereses", "S/ " + nf.format(t.interes)],
-    ["Total a pagar",      "S/ " + nf.format(t.pagado)],
-    ["Cuotas mensuales",   String(s.meses)]
-  ].forEach((g, i) => {
-    const x = PDF_M + (gW + 12) * i;
-    fill(doc, C.white); stroke(doc, C.line); doc.setLineWidth(0.8);
-    doc.roundedRect(x, gY, gW, gH, 10, 10, "FD");
-    txt(doc, g[0], x + 18, gY + 27, { size: 8.2, color: C.muted });
-    txt(doc, g[1], x + 18, gY + 52,
-        { size: ajustar(doc, g[1], gW - 36, 15, "bold"), style: "bold", color: C.navy });
-  });
-
   /* ── Nota ── */
-  const nY = gY + gH + 26;
+  const nY = tY + rH * filas.length + 34;
   doc.setFont("helvetica", "normal"); doc.setFontSize(8.2);
   const nota = doc.splitTextToSize(NOTA_PROPUESTA, PDF_CW - 44);
   const nH   = 22 + nota.length * 11;
